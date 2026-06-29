@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Java 8 Streams — Cheat Sheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f0ede8;
+    --surface:   #f7f5f2;
+    --card:      #ffffff;
+    --border:    #e4e0d8;
+    --border2:   #d0cbc2;
+    --text:      #1a1a1a;
+    --muted:     #6b6560;
+    --label:     #8a837a;
+    --th-bg:     #f7f5f2;
+    --row-hover: #fafaf8;
+    --highlight: #ffe566;
+    --avoid-bg:  #fff1f0;
+    --avoid-txt: #c0392b;
+    --use-txt:   #1a5e35;
+    --tech-clr:  #1a1a1a;
+    --accent1:#2563eb; --accent2:#d97706; --accent3:#16a34a; --accent4:#7c3aed;
+    --accent5:#dc2626; --accent6:#0891b2; --accent7:#d97706; --accent8:#0284c7;
+    --accent9:#6d28d9; --accent10:#92400e;
+    --mono: "JetBrains Mono", monospace;
+    --sans: "Inter", -apple-system, sans-serif;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  html { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 13px; }
+  body { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+  .masthead {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 2px solid var(--border2); padding-bottom: 14px; margin-bottom: 32px;
+  }
+  .masthead h1 { font-size: 14px; font-weight: 600; letter-spacing: .02em; color: var(--text); }
+  .masthead h1 span { color: #2563eb; }
+  .masthead p  { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+  .section-label {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text);
+    margin: 32px 0 12px;
+  }
+  .section-label .icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 4px;
+    background: var(--border2); flex-shrink: 0;
+    font-size: 10px; color: var(--text);
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); margin-left: 4px; }
+
+  .grid-2  { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .grid-3  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-4  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px 9px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .card-header .dot {
+    width: 7px; height: 7px; border-radius: 2px;
+    background: var(--card-color, #6b6560); flex-shrink: 0;
+  }
+  .card-header h3 {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--text);
+  }
+
+  .card table { width: 100%; border-collapse: collapse; }
+  .card table th {
+    font-size: 9.5px; font-weight: 600; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--label);
+    padding: 7px 14px 6px; text-align: left;
+    background: var(--th-bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .card table td {
+    padding: 7px 14px; font-size: 12.5px; color: var(--text);
+    border-bottom: 1px solid var(--border); vertical-align: middle;
+    line-height: 1.4; background: var(--card);
+  }
+  .card table tr:last-child td { border-bottom: none; }
+  .card table tr:hover td { background: var(--row-hover); }
+
+  .card table td:first-child {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--tech-clr); white-space: nowrap;
+  }
+  .card table td.dim   { color: var(--muted); }
+  .card table td.avoid { color: var(--avoid-txt); }
+  .card table td.use   { color: var(--use-txt); }
+  .card table td.mono2 { font-family: var(--mono); font-size: 11px; color: #1d4ed8; white-space: normal; }
+
+  .hl { background: var(--highlight); border-radius: 2px; padding: 0 2px; }
+
+  .tree { padding: 10px 14px 12px; }
+  .tree-q { font-size: 11px; font-weight:600; color: var(--text); margin-bottom:4px; }
+  .tree-branch { display: flex; align-items: flex-start; gap: 0; padding: 2px 0 2px 8px; }
+  .tree-arrow  { color: var(--border2); font-size: 12px; flex-shrink: 0; margin-top:1px; font-family: var(--mono); }
+  .tree-answer { font-family: var(--mono); font-size: 11.5px; font-weight:600; color: #1d4ed8; margin-left:6px; }
+  .tree-note   { font-size: 11px; color: var(--muted); margin-left: 4px; margin-top: 1px; }
+  .tree-sep    { border: none; border-top: 1px solid var(--border); margin: 9px 0; }
+
+  /* code block */
+  .codeblock { font-family: var(--mono); font-size: 11px; line-height: 1.6; color: var(--text);
+    padding: 10px 14px 12px; white-space: pre-wrap; word-break: break-word; }
+  .codeblock + .codeblock { border-top: 1px solid var(--border); }
+  .codeblock .c { color: var(--muted); }            /* comment */
+  .codeblock .k { color: #1d4ed8; font-weight: 600; } /* method / keyword */
+  .codeblock .g { color: var(--use-txt); }           /* good */
+  .codeblock .b { color: var(--avoid-txt); }         /* bad */
+  .codeblock .ttl { display:block; font-family: var(--sans); font-size:10px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; color: var(--label); margin: 2px 0 5px; }
+
+  .formula-row { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px;
+    border-bottom: 1px solid var(--border); font-size: 12px; }
+  .formula-row:last-child { border-bottom: none; }
+  .formula-key { color: var(--muted); min-width: 120px; flex-shrink: 0; }
+  .formula-val { font-family: var(--mono); font-size: 11px; color: #1d4ed8; font-weight: 500; }
+
+  .note-list { padding: 8px 14px 10px; font-size: 11.5px; color: var(--muted); line-height: 1.7; }
+  .note-list b { color: var(--text); font-weight: 600; }
+  .note-list .m { font-family: var(--mono); color: #1d4ed8; font-size: 11px; }
+  .note-list .r { color: var(--avoid-txt); font-weight: 600; }
+  .note-list .ok { color: var(--use-txt); font-weight: 600; }
+
+  .sub-th { font-size: 9.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--label); padding: 7px 14px 5px; background: var(--surface);
+    border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+
+  @media print {
+    body { padding: 12px; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <h1>Java 8 <span>Streams</span> — Cheat Sheet</h1>
+  <p>Mental model → internals → parallelism → judgment · pattern recognition to Distinguished-level depth</p>
+</div>
+
+<!-- ═══════════════════════════════════════════ MENTAL MODEL ══ -->
+<div class="section-label"><span class="icon">◉</span>Mental Model</div>
+<div class="grid-3">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent1)">
+      <div class="dot" style="background:var(--accent1)"></div><h3>The One Mental Model</h3>
+    </div>
+    <div class="codeblock">A stream is a <b style="color:var(--text)">pipeline</b>. Every problem =
+<span class="k">Source → Transform → Aggregate</span>
+
+  What do I have?        <span class="c">→ Source</span>
+  What do I want to do?  <span class="c">→ Intermediate ops</span>
+  What do I want back?   <span class="c">→ Terminal op</span>
+
+<span class="c">A stream holds NO data — it is a plan over a
+source, executed ONCE, on demand.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent1)">
+      <div class="dot" style="background:var(--accent1)"></div><h3>The 3-Question Framework</h3>
+    </div>
+    <div class="codeblock"><span class="ttl">Ask before writing a line</span>1. WHAT element type flows through?
+   <span class="c">Employee, Integer, Transaction…</span>
+
+2. WHAT transformation?
+   <span class="c">filter, map, flatMap, sorted,
+   distinct, grouped…</span>
+
+3. WHAT do I collect into?
+   <span class="c">List, Map, single value, boolean</span>
+
+<span class="c">+ one clarifying Q: dups? null keys?
+ordering? scale? → sounds senior.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent1)">
+      <div class="dot" style="background:var(--accent1)"></div><h3>Terminal Op Decision Tree</h3>
+    </div>
+    <div class="tree">
+      <div class="tree-q">What do you want back?</div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">A list</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">collect(toList())</span><span class="tree-note"> · Java16+ .toList()</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">A map (grouped)</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">groupingBy / toMap</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">A number</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">count / sum / average / reduce</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">A single object → Optional</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">findFirst / findAny / min / max</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">A boolean</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">anyMatch / allMatch / noneMatch</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">└─</span><div><span class="tree-note">A string</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">collect(joining(d,pre,suf))</span></div></div></div>
+      <hr class="tree-sep">
+      <div class="tree-note"><b style="color:var(--text)">findAny</b> over findFirst in parallel — no encounter-order cost.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ OPERATIONS ══ -->
+<div class="section-label"><span class="icon">⚙</span>Operations</div>
+<div class="grid-2">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent4)">
+      <div class="dot" style="background:var(--accent4)"></div><h3>Intermediate Ops — Stateless vs Stateful</h3>
+    </div>
+    <table>
+      <thead><tr><th>Op</th><th>Does</th><th>State</th></tr></thead>
+      <tbody>
+        <tr><td>filter</td><td class="dim">keep matching elements</td><td class="use">stateless</td></tr>
+        <tr><td>map</td><td class="dim">transform each element</td><td class="use">stateless</td></tr>
+        <tr><td>flatMap</td><td class="dim">flatten nested → one stream</td><td class="use">stateless</td></tr>
+        <tr><td>mapToInt/Double</td><td class="dim">to primitive (no boxing)</td><td class="use">stateless</td></tr>
+        <tr><td>distinct</td><td class="dim">remove dups (buffers a Set)</td><td class="avoid">STATEFUL</td></tr>
+        <tr><td>sorted</td><td class="dim">order — buffers ENTIRE stream</td><td class="avoid">BARRIER</td></tr>
+        <tr><td>limit / skip</td><td class="dim">take / drop first N</td><td class="avoid">stateful</td></tr>
+        <tr><td>takeWhile/dropWhile</td><td class="dim">stop/skip on predicate (Java 9)</td><td class="avoid">stateful</td></tr>
+        <tr><td>peek</td><td class="dim">debug only — may be elided</td><td class="use">stateless</td></tr>
+      </tbody>
+    </table>
+    <div class="note-list"><b>Why it matters:</b> stateful ops buffer, <span class="r">break infinite streams</span>, and cost in parallel. <span class="m">iterate(0,i-&gt;i+1).sorted().limit(5)</span> hangs — <span class="ok">limit before sorted</span>.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent4)">
+      <div class="dot" style="background:var(--accent4)"></div><h3>The Comparator Pattern</h3>
+    </div>
+    <div class="codeblock"><span class="ttl">Multi-level sort — always this shape</span><span class="k">Comparator.comparing</span>(Book::author)   <span class="c">// primary</span>
+   .<span class="k">thenComparing</span>(Book::title)         <span class="c">// tiebreak</span>
+   .<span class="k">reversed</span>()                         <span class="c">// flip ALL above</span>
+   .<span class="k">thenComparingInt</span>(Book::year)       <span class="c">// avoid boxing</span>
+
+<span class="c">Gotcha: .reversed() flips the WHOLE chain
+composed so far, not just the last key.</span>
+<span class="c">Null-safe: nullsFirst(naturalOrder())</span></div>
+    <div class="note-list" style="border-top:1px solid var(--border)"><b>Method refs:</b> <span class="m">Integer::parseInt</span> (static) · <span class="m">String::toUpperCase</span> (unbound) · <span class="m">out::println</span> (bound) · <span class="m">ArrayList::new</span> (ctor)</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ COLLECTORS ══ -->
+<div class="section-label"><span class="icon">▦</span>Collectors — The Complete Catalog</div>
+<div class="grid-2">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent3)">
+      <div class="dot" style="background:var(--accent3)"></div><h3>~30 Collectors in 6 Categories</h3>
+    </div>
+    <table>
+      <tbody>
+        <tr><td colspan="2" class="sub-th" style="padding-left:14px">1 · Into a container</td></tr>
+        <tr><td>toList / toSet</td><td class="dim">mutable; no type guarantee</td></tr>
+        <tr><td>toCollection(s)</td><td class="dim">TreeSet::new, ArrayDeque::new</td></tr>
+        <tr><td>toUnmodifiable*</td><td class="dim">Java 10 · NPE on null</td></tr>
+        <tr><td colspan="2" class="sub-th" style="padding-left:14px">2 · Into a map</td></tr>
+        <tr><td>toMap(k,v[,merge[,sup]])</td><td class="avoid">no merge → throws on dup; NPE on null val</td></tr>
+        <tr><td>toConcurrentMap</td><td class="dim">parallel + unordered</td></tr>
+        <tr><td colspan="2" class="sub-th" style="padding-left:14px">3 · Reduce to a value</td></tr>
+        <tr><td>counting</td><td class="dim">→ Long</td></tr>
+        <tr><td>summing/averaging*</td><td class="dim">Int / Long / Double</td></tr>
+        <tr><td>summarizing*</td><td class="use">count+sum+min+max+avg, ONE pass</td></tr>
+        <tr><td>minBy / maxBy</td><td class="dim">→ Optional</td></tr>
+        <tr><td>reducing(…)</td><td class="dim">3 overloads</td></tr>
+        <tr><td colspan="2" class="sub-th" style="padding-left:14px">4 · Strings</td></tr>
+        <tr><td>joining([d[,pre,suf]])</td><td class="dim">O(n) via shared StringBuilder</td></tr>
+        <tr><td colspan="2" class="sub-th" style="padding-left:14px">5 · Group / partition (take downstream)</td></tr>
+        <tr><td>groupingBy(fn[,map][,dn])</td><td class="dim">→ Map&lt;K, D&gt;</td></tr>
+        <tr><td>partitioningBy(p[,dn])</td><td class="dim">always BOTH true/false keys</td></tr>
+        <tr><td>groupingByConcurrent</td><td class="dim">parallel</td></tr>
+        <tr><td colspan="2" class="sub-th" style="padding-left:14px">6 · Adapters (ARE downstreams → nest)</td></tr>
+        <tr><td>mapping / flatMapping</td><td class="dim">transform/flatten before collect</td></tr>
+        <tr><td>filtering</td><td class="dim">Java 9 · keeps empty groups</td></tr>
+        <tr><td>collectingAndThen</td><td class="dim">post-process result</td></tr>
+        <tr><td>teeing</td><td class="use">Java 12 · two collectors, one pass</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent3)">
+      <div class="dot" style="background:var(--accent3)"></div><h3>Composition — the 5 shapes + nesting</h3>
+    </div>
+    <div class="codeblock"><span class="ttl">The 5 you memorise</span>groupingBy(Emp::dept)                       <span class="c">// → List</span>
+groupingBy(Emp::dept, <span class="k">counting</span>())
+groupingBy(Emp::dept, <span class="k">summingDouble</span>(Emp::sal))
+groupingBy(Emp::dept, <span class="k">mapping</span>(Emp::name, toList()))
+partitioningBy(e -&gt; e.sal() &gt; 70_000)</div>
+    <div class="codeblock"><span class="ttl">The grammar: drop ANY collector in a downstream</span>groupingBy(dept, mapping(Emp::name, <span class="k">toSet</span>()))
+groupingBy(dept, groupingBy(grade, counting()))  <span class="c">// 2-level</span>
+groupingBy(dept, filtering(p, toList()))         <span class="c">// keep empties</span>
+partitioningBy(p, groupingBy(dept))              <span class="c">// part→group</span>
+collectingAndThen(toList(), <span class="k">unmodifiableList</span>)
+teeing(counting(), summingDouble(f),
+       (c,s) -&gt; s/c)                  <span class="c">// avg, one pass</span>
+toMap(k, v, (a,b)-&gt;a, LinkedHashMap::new)         <span class="c">// dedup+order</span>
+
+<span class="c">No finite list of "patterns" — a small grammar
+that composes. Group/partition take a downstream;
+adapters ARE downstreams → infinite nesting.</span></div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ PROBLEM PATTERNS ══ -->
+<div class="section-label"><span class="icon">◈</span>The 6 Problem Patterns</div>
+<div class="grid-3">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent1)"><div class="dot" style="background:var(--accent1)"></div><h3>1 · Filter + Collect</h3></div>
+    <div class="codeblock"><span class="c">// names in Eng, salary &gt; 80k</span>
+employees.stream()
+  .filter(e -&gt; "Eng".equals(e.dept()))
+  .filter(e -&gt; e.salary() &gt; 80_000)
+  .map(Employee::name)
+  .collect(toList());</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent3)"><div class="dot" style="background:var(--accent3)"></div><h3>2 · Group + Aggregate</h3></div>
+    <div class="codeblock"><span class="c">// max earner per dept (name only)</span>
+.collect(groupingBy(Emp::dept,
+  collectingAndThen(
+    maxBy(comparingDouble(Emp::salary)),
+    o -&gt; o.map(Emp::name).orElse("none"))));</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent4)"><div class="dot" style="background:var(--accent4)"></div><h3>3 · Sort + Slice</h3></div>
+    <div class="codeblock"><span class="c">// 2nd-highest DISTINCT value</span>
+.map(Emp::salary).distinct()
+  .sorted(reverseOrder())
+  .skip(1).findFirst();
+<span class="c">// sorted = O(n log n) — for top-K use a
+// bounded heap O(n log k). Clarify
+// "distinct value vs rank" first.</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent6)"><div class="dot" style="background:var(--accent6)"></div><h3>4 · Flatten + Process</h3></div>
+    <div class="codeblock"><span class="c">// all settled txns across accounts</span>
+accounts.stream()
+  .flatMap(a -&gt; a.getTxns().stream())
+  .filter(t -&gt; "SETTLED".equals(t.status()))
+  .mapToDouble(Txn::amount)
+  .sum();</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent2)"><div class="dot" style="background:var(--accent2)"></div><h3>5 · Partition</h3></div>
+    <div class="codeblock"><span class="c">// split high / low earners</span>
+.collect(partitioningBy(
+   e -&gt; e.salary() &gt; 70_000));
+<span class="c">// → Map&lt;Boolean, List&lt;Emp&gt;&gt;</span>
+.collect(partitioningBy(p, counting()));
+<span class="c">// always BOTH keys present</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent5)"><div class="dot" style="background:var(--accent5)"></div><h3>6 · String Ops</h3></div>
+    <div class="codeblock"><span class="c">// first non-repeating char — Unicode-safe</span>
+str.<span class="k">codePoints</span>()                <span class="c">// not chars()!</span>
+  .mapToObj(Character::toString)
+  .collect(groupingBy(identity(),
+     LinkedHashMap::new, counting()))
+  .entrySet().stream()
+  .filter(e -&gt; e.getValue() == 1)
+  .map(Map.Entry::getKey).findFirst();</div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ TRAPS ══ -->
+<div class="section-label"><span class="icon">⚠</span>The Traps Interviewers Set</div>
+<div class="card">
+  <div class="card-header" style="--card-color: var(--accent5)">
+    <div class="dot" style="background:var(--accent5)"></div><h3>The wrong reflex — and the correct answer</h3>
+  </div>
+  <table>
+    <thead><tr><th style="width:20%">Trap</th><th style="width:40%">Wrong</th><th>Correct</th></tr></thead>
+    <tbody>
+      <tr><td>"Second highest"</td><td class="avoid">blindly add distinct() (or omit it)</td><td class="use">CLARIFY: second distinct value vs second-ranked employee — they differ on ties</td></tr>
+      <tr><td>orElse vs orElseGet</td><td class="avoid">orElse(loadFromDb()) — runs even on a hit</td><td class="use">orElseGet(() -&gt; loadFromDb()) — lazy, runs only when empty</td></tr>
+      <tr><td>toMap duplicate key</td><td class="avoid">toMap(k, v) — IllegalStateException on dup</td><td class="use">toMap(k, v, (a,b)-&gt;a) — always pass a merge fn</td></tr>
+      <tr><td>toMap null value</td><td class="avoid">null value → NullPointerException (via Map.merge)</td><td class="use">filter nulls or map to a sentinel first</td></tr>
+      <tr><td>map vs flatMap</td><td class="avoid">user.map(User::getAddress) → Optional&lt;Optional&lt;…&gt;&gt;</td><td class="use">flatMap when the fn already returns Optional/Stream</td></tr>
+      <tr><td>chars() Unicode</td><td class="avoid">str.chars() + (char) c — corrupts emoji / U+FFFF+</td><td class="use">str.codePoints() + Character::toString</td></tr>
+      <tr><td>reuse / laziness</td><td class="avoid">reuse a stream → IllegalStateException; no terminal → nothing runs</td><td class="use">one terminal op per stream; streams are lazy + single-use</td></tr>
+      <tr><td>parallel forEach</td><td class="avoid">forEach(list::add) in parallel — data race + unordered</td><td class="use">collect() with a Collector; forEachOrdered if order matters</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════ INTERNALS ══ -->
+<div class="section-label"><span class="icon">⚡</span>Internals &amp; Laziness</div>
+<div class="grid-3">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent8)"><div class="dot" style="background:var(--accent8)"></div><h3>How a Stream Executes</h3></div>
+    <div class="note-list">
+      <b>Source = Spliterator</b> (<span class="m">tryAdvance</span>, <span class="m">trySplit</span> → basis of parallelism).<br>
+      <b>Lazy + fused:</b> intermediate ops build a chain of <b>Sinks</b>; nothing runs until a terminal op pulls elements through in <b>one pass</b> — <span class="ok">no intermediate collections</span>.<br>
+      <b>Short-circuit:</b> limit / findFirst / anyMatch / takeWhile cancel traversal early → safe on infinite streams.<br>
+      <span class="m">peek</span> may be <b>elided</b>: count() can skip the whole pipeline (Java 9+).
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent8)"><div class="dot" style="background:var(--accent8)"></div><h3>reduce, Properly</h3></div>
+    <div class="codeblock">reduce(<span class="k">identity</span>, <span class="k">accumulator</span>, <span class="k">combiner</span>)
+   words.reduce(0,
+     (acc,w) -&gt; acc + w.length(),  <span class="c">// U×T→U</span>
+     (a,b)   -&gt; a + b);            <span class="c">// U×U→U</span></div>
+    <div class="note-list" style="border-top:1px solid var(--border)">
+      3 laws (break → <span class="r">parallel goes wrong</span>): <b>identity</b> (id op x = x), <b>associativity</b> (sub/div fail), <b>compatibility</b>.<br>
+      <b>Combiner runs ONLY in parallel</b> — bugs hide in sequential tests.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent8)"><div class="dot" style="background:var(--accent8)"></div><h3>reduce vs collect · Collector</h3></div>
+    <div class="note-list">
+      <b>reduce</b> = immutable reduction (values). String via <span class="m">a+b</span> is <span class="r">O(n²)</span>.<br>
+      <b>collect</b> = mutable reduction (containers) — the right tool for List/Map/StringBuilder.<br>
+      <b>Collector = 5 fns:</b> <span class="m">supplier · accumulator · combiner · finisher · characteristics</span> (IDENTITY_FINISH, UNORDERED, CONCURRENT). Write your own with <span class="m">Collector.of(…)</span>.
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ PARALLELISM ══ -->
+<div class="section-label"><span class="icon">⇉</span>Parallelism &amp; Correctness</div>
+<div class="grid-2">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent2)"><div class="dot" style="background:var(--accent2)"></div><h3>Parallel — Wins vs Backfires</h3></div>
+    <table>
+      <thead><tr><th>Use parallel when</th><th>Avoid when</th></tr></thead>
+      <tbody>
+        <tr><td class="mono2" style="color:var(--use-txt)">large N × non-trivial work</td><td class="avoid">small N, or tiny per-element work</td></tr>
+        <tr><td class="mono2" style="color:var(--use-txt)">splits cheap+even: array, ArrayList</td><td class="avoid">LinkedList, iterate, BufferedReader.lines</td></tr>
+        <tr><td class="mono2" style="color:var(--use-txt)">CPU-bound, independent</td><td class="avoid">blocking I/O, locks, DB calls</td></tr>
+        <tr><td class="mono2" style="color:var(--use-txt)">stateless, cheap to combine</td><td class="avoid">sorted/distinct/limit barriers</td></tr>
+      </tbody>
+    </table>
+    <div class="note-list" style="border-top:1px solid var(--border)"><b>Rule of thumb:</b> N × Q (size × cost-per-element) ≳ <span class="m">10,000</span>. Amdahl: tiny work never amortises fork/join overhead — often <span class="r">slower</span> than sequential.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent5)"><div class="dot" style="background:var(--accent5)"></div><h3>The Footgun + Correctness Rules</h3></div>
+    <div class="note-list">
+      <b class="r">commonPool footgun:</b> every parallel stream shares ONE pool (cores−1). A <b>blocking</b> call starves all of them — process-wide. Never block in a parallel stream; isolate in your own <span class="m">ForkJoinPool</span> if you must.
+    </div>
+    <div class="note-list" style="border-top:1px solid var(--border)">
+      <b>3 correctness rules:</b><br>
+      1. <span class="ok">No shared mutable state</span> (collect, don't forEach(list::add)).<br>
+      2. <span class="ok">Associative, stateless</span> lambdas (reduce-with-subtract is wrong).<br>
+      3. <span class="ok">A correct combiner</span> (untested by sequential runs).<br>
+      <b>Ordering:</b> findAny &gt; findFirst · forEachOrdered preserves order · <span class="m">.unordered()</span> speeds distinct/limit.
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ JUDGMENT ══ -->
+<div class="section-label"><span class="icon">◎</span>Judgment, Performance &amp; Quick Ref</div>
+<div class="grid-3">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent9)"><div class="dot" style="background:var(--accent9)"></div><h3>When NOT to Use Streams</h3></div>
+    <div class="note-list">
+      <b>Prefer a loop when:</b> hot inner loop (lambdas/Spliterator allocate; loops are JIT-friendlier) · need index mutation / complex break · checked exceptions · a loop is simply clearer · you need a clean stack trace.<br>
+      <b>A stream is not a goal.</b> Use it for clear bulk transformation, not as a hammer.<br>
+      <b>Money:</b> <span class="r">never double</span> — <span class="m">BigDecimal + reduce</span>. (summingDouble uses Kahan sum but binary≠decimal.)
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent9)"><div class="dot" style="background:var(--accent9)"></div><h3>Primitive Streams &amp; One-Pass</h3></div>
+    <div class="codeblock"><span class="ttl">count+sum+min+max+avg in ONE pass</span>DoubleSummaryStatistics s = emps.stream()
+  .mapToDouble(Emp::salary)
+  .<span class="k">summaryStatistics</span>();
+s.getCount(); s.getSum(); s.getAverage();</div>
+    <div class="note-list" style="border-top:1px solid var(--border)">
+      <b>IntStream/LongStream/DoubleStream</b> avoid boxing (GC). <span class="m">boxed()</span> at the boundary.<br>
+      <b>Checked exceptions</b> don't fit lambdas → handle inside, wrap unchecked, or use a loop.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent9)"><div class="dot" style="background:var(--accent9)"></div><h3>Java 8 → 21 Evolution</h3></div>
+    <table>
+      <tbody>
+        <tr><td>8</td><td class="dim">Streams, Collectors, Optional, primitive streams</td></tr>
+        <tr><td>9</td><td class="dim">takeWhile/dropWhile, 3-arg iterate, ofNullable, flatMapping/filtering</td></tr>
+        <tr><td>10</td><td class="dim">toUnmodifiableList/Set/Map</td></tr>
+        <tr><td>12</td><td class="dim">Collectors.teeing</td></tr>
+        <tr><td>16</td><td class="dim">Stream.toList(), mapMulti, records</td></tr>
+        <tr><td>21</td><td class="dim">virtual threads (help blocking I/O, not CPU streams)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="grid-2" style="margin-top:14px">
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent6)"><div class="dot" style="background:var(--accent6)"></div><h3>Functional Interfaces</h3></div>
+    <table>
+      <thead><tr><th>Interface</th><th>Shape</th><th>Method</th></tr></thead>
+      <tbody>
+        <tr><td>Supplier&lt;T&gt;</td><td class="dim">() → T</td><td class="mono2">get()</td></tr>
+        <tr><td>Consumer&lt;T&gt;</td><td class="dim">T → void</td><td class="mono2">accept(T)</td></tr>
+        <tr><td>Predicate&lt;T&gt;</td><td class="dim">T → boolean</td><td class="mono2">test(T)</td></tr>
+        <tr><td>Function&lt;T,R&gt;</td><td class="dim">T → R</td><td class="mono2">apply(T)</td></tr>
+        <tr><td>UnaryOperator&lt;T&gt;</td><td class="dim">T → T</td><td class="mono2">apply(T)</td></tr>
+        <tr><td>BinaryOperator&lt;T&gt;</td><td class="dim">T,T → T</td><td class="mono2">apply(T,T)</td></tr>
+        <tr><td>BiFunction&lt;T,U,R&gt;</td><td class="dim">T,U → R</td><td class="mono2">apply(T,U)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent10)"><div class="dot" style="background:var(--accent10)"></div><h3>Key Rules to Never Forget</h3></div>
+    <div class="note-list">
+      1. distinct() before sorted() for Nth highest — but clarify <b>value vs rank</b>.<br>
+      2. <span class="m">LinkedHashMap::new</span> in groupingBy when key order matters.<br>
+      3. flatMap when the fn returns a Stream/Optional.<br>
+      4. <span class="m">orElseGet</span> (not orElse) for expensive defaults.<br>
+      5. toMap always needs a merge fn; <span class="r">NPEs on null values</span>.<br>
+      6. Streams are <b>lazy</b> + <b>single-use</b>.<br>
+      7. sorted/distinct/limit are stateful — buffer, break infinite, cost in parallel.<br>
+      8. reduce's 3-arg combiner runs <b>only in parallel</b>.<br>
+      9. Parallel = no shared state + associative + correct combiner; never block.<br>
+      10. <span class="m">codePoints()</span> not chars() for Unicode.<br>
+      11. IntStream/summaryStatistics to avoid boxing &amp; aggregate in one pass.<br>
+      12. For money: <b>BigDecimal + reduce</b>, never double.
+    </div>
+  </div>
+</div>
+
+<div style="text-align:center; padding: 24px 0 8px; font-size:10.5px; color:var(--muted); font-family:var(--mono)">
+  Java 8 Streams — Mental Model → Distinguished depth · pattern recognition · internals · parallelism · judgment
+</div>
+
+</body>
+</html>
