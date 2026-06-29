@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Cheat Sheets — Launcher</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#f0ede8; --surface:#f7f5f2; --card:#ffffff; --border:#e4e0d8; --border2:#d0cbc2;
+    --text:#1a1a1a; --muted:#6b6560; --label:#8a837a; --row-hover:#fafaf8;
+    --accent1:#2563eb; --accent2:#d97706; --accent3:#16a34a; --accent4:#7c3aed;
+    --accent5:#dc2626; --accent6:#0891b2; --accent8:#0284c7; --accent9:#6d28d9; --accent10:#92400e;
+    --mono:"JetBrains Mono",monospace; --sans:"Inter",-apple-system,sans-serif;
+    --radius:10px; --shadow:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.04);
+  }
+  html { font-family:var(--sans); background:var(--bg); color:var(--text); font-size:13px; }
+  body { padding:28px 32px; max-width:1320px; margin:0 auto; }
+  .masthead { display:flex; align-items:baseline; justify-content:space-between; border-bottom:2px solid var(--border2); padding-bottom:14px; margin-bottom:8px; }
+  .masthead h1 { font-size:15px; font-weight:600; letter-spacing:.02em; }
+  .masthead h1 span { color:#2563eb; }
+  .masthead p { font-size:11px; color:var(--muted); font-family:var(--mono); }
+  .intro { font-size:11.5px; color:var(--muted); margin:14px 2px 4px; line-height:1.6; }
+  .section-label { display:flex; align-items:center; gap:10px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin:30px 0 12px; }
+  .section-label .icon { display:flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:4px; background:var(--border2); flex-shrink:0; font-size:10px; }
+  .section-label .count { font-family:var(--mono); font-weight:500; color:var(--label); letter-spacing:0; }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border2); margin-left:4px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:980px){ .grid { grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:640px){ .grid { grid-template-columns:1fr;} }
+  .tile {
+    display:block; text-decoration:none; color:inherit;
+    background:var(--card); border:1px solid var(--border); border-left:3px solid var(--clr,#6b6560);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:13px 15px 14px;
+    transition:transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .tile:hover { transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06); }
+  .tile-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+  .tag { font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+         color:var(--clr,#6b6560); background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:2px 6px; }
+  .arrow { font-family:var(--mono); color:var(--border2); font-size:13px; transition:color .12s, transform .12s; }
+  .tile:hover .arrow { color:var(--clr,#2563eb); transform:translateX(2px); }
+  .tile-title { font-size:13.5px; font-weight:600; letter-spacing:.01em; margin-bottom:5px; }
+  .tile-desc { font-size:11px; color:var(--muted); line-height:1.55; }
+  .footer { text-align:center; padding:26px 0 8px; font-size:10.5px; color:var(--muted); font-family:var(--mono); line-height:1.7; }
+  .footer a { color:var(--accent1); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <h1>Interview <span>Cheat Sheets</span> — Launcher</h1>
+  <p>Staff-level interview kit · click any tile to open</p>
+</div>
+<div class="intro">
+  One-page mental models in a consistent template — pattern recognition, internals, traps, and key rules. Each is print-to-PDF friendly. Streams &amp; SQL also have deeper markdown companions in the vault.
+</div>
+
+<!-- ════════════════════ JAVA ══ -->
+<div class="section-label"><span class="icon">☕</span>Java <span class="count">· 14</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent1)" href="3-Languages-Frameworks/Java/Java8_Features_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Java 8 Features</div>
+    <div class="tile-desc">Lambdas · functional interfaces · method refs · default methods · Optional · java.time · CompletableFuture · PermGen→Metaspace</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent1)" href="3-Languages-Frameworks/Java/Java8_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Java 8 Streams</div>
+    <div class="tile-desc">The pipeline mental model → the complete Collectors catalog → internals &amp; laziness → parallelism → judgment</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent3)" href="3-Languages-Frameworks/Java/Java_Collections_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Collections Framework</div>
+    <div class="tile-desc">Pick the structure · Big-O table · HashMap internals (treeify) · fail-fast vs fail-safe · concurrent collections</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent6)" href="3-Languages-Frameworks/Java/Java_Concurrency_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Concurrency &amp; Multithreading</div>
+    <div class="tile-desc">JMM &amp; happens-before · locks &amp; atomics · thread pools · CompletableFuture · deadlock · virtual threads</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent5)" href="3-Languages-Frameworks/Java/Java_Memory_Management_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Memory Management &amp; Heap Dumps</div>
+    <div class="tile-desc">JVM layout · GC algorithms · reference types · leak patterns · OOM decoder · heap-dump capture &amp; analysis</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent9)" href="3-Languages-Frameworks/Java/SOLID_Design_Patterns_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">SOLID &amp; Design Patterns</div>
+    <div class="tile-desc">5 principles · 23 GoF patterns · JDK/Spring examples · the comparisons (Decorator vs Proxy, Strategy vs Template…)</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent4)" href="3-Languages-Frameworks/Java/Low_Level_Design_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Low Level Design (LLD)</div>
+    <div class="tile-desc">Object relationships — association / aggregation / composition / dependency · OOP pillars · coupling &amp; cohesion · UML · the LLD process</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent4)" href="3-Languages-Frameworks/Java/Interface_vs_Abstract_Class_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java · LLD</span><span class="arrow">→</span></div>
+    <div class="tile-title">Interface vs Abstract Class</div>
+    <div class="tile-desc">Contract vs partial base · multiple inheritance · default/static methods · diamond · when to use which</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent5)" href="3-Languages-Frameworks/Java/Java_Exception_Handling_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Exception Handling</div>
+    <div class="tile-desc">Throwable hierarchy · checked vs unchecked · try-with-resources · chaining · best practices</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent3)" href="3-Languages-Frameworks/Java/Java_Immutable_Objects_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">Immutable Objects</div>
+    <div class="tile-desc">Build rules · defensive copies · records · why immutability wins · the gotchas</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent1)" href="3-Languages-Frameworks/Java/Java_String_Internals_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">String Internals</div>
+    <div class="tile-desc">String pool · == vs equals · intern · concatenation · the tricky "how many objects" questions</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent2)" href="3-Languages-Frameworks/Java/Java_Executor_Service_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Java</span><span class="arrow">→</span></div>
+    <div class="tile-title">ExecutorService</div>
+    <div class="tile-desc">Thread pools · ThreadPoolExecutor params · submit vs execute · Future · shutdown · virtual threads</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent6)" href="3-Languages-Frameworks/Java/Java_HashMap_Deep_Dive.html">
+    <div class="tile-top"><span class="tag">Java · Collections</span><span class="arrow">→</span></div>
+    <div class="tile-title">HashMap Deep Dive</div>
+    <div class="tile-desc">Buckets · hashing · treeify (Java 8) · resize · load factor · equals/hashCode · internals</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent9)" href="3-Languages-Frameworks/Java/Java_ConcurrentHashMap_Deep_Dive.html">
+    <div class="tile-top"><span class="tag">Java · Collections</span><span class="arrow">→</span></div>
+    <div class="tile-title">ConcurrentHashMap Deep Dive</div>
+    <div class="tile-desc">Bin-level locking · lock-free reads · CAS · atomic compute · no nulls · Java 7→8 redesign</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ SPRING ══ -->
+<div class="section-label"><span class="icon">🍃</span>Spring <span class="count">· 7</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent3)" href="3-Languages-Frameworks/Spring/Spring_Boot_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Spring Boot</div>
+    <div class="tile-desc">IoC &amp; auto-config · bean lifecycle · stereotypes (@RestController vs @Controller, @Service vs @Repository) · scopes · swap the container · @Transactional</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent3)" href="3-Languages-Frameworks/Spring/Spring_Boot_Annotations_Cheat_Sheet.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Spring Boot · Top 25 Annotations</div>
+    <div class="tile-desc">The 25 most-used annotations grouped by concern — bootstrap, DI, stereotypes, web/REST, errors &amp; validation, data/config — plus the key distinctions</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent2)" href="3-Languages-Frameworks/Spring/Spring_Boot_Caching_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Spring Boot · Caching</div>
+    <div class="tile-desc">Cache abstraction · @Cacheable / @CachePut / @CacheEvict · key &amp; condition · providers (Caffeine/Redis) · TTL · stampede · AOP</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent5)" href="3-Languages-Frameworks/Spring/Spring_Boot_Transactions_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Spring Boot · Transactions</div>
+    <div class="tile-desc">@Transactional · propagation · isolation levels &amp; anomalies · class vs method level · rollback rules · AOP proxy &amp; self-invocation</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent9)" href="3-Languages-Frameworks/Spring/Spring_Security_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Spring Security</div>
+    <div class="tile-desc">Filter chain · authN vs authZ · JWT · OAuth2 · OIDC · CSRF · CORS · method security</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent4)" href="3-Languages-Frameworks/Spring/Spring_Data_JPA_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Spring Data JPA</div>
+    <div class="tile-desc">Persistence context · entity lifecycle · dirty checking · fetch &amp; cascade · N+1 · locking · specifications</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent6)" href="3-Languages-Frameworks/Spring/Spring_Reactive_WebFlux_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Spring</span><span class="arrow">→</span></div>
+    <div class="tile-title">Reactive · WebFlux &amp; Reactor</div>
+    <div class="tile-desc">Non-blocking · Mono &amp; Flux · operators · backpressure · schedulers · when to use it (and not)</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ MICROSERVICES ══ -->
+<div class="section-label"><span class="icon">🧩</span>Microservices <span class="count">· 6</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent1)" href="2-System-Design/microservices/Microservices_Concepts_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Microservices</span><span class="arrow">→</span></div>
+    <div class="tile-title">Concepts · Spring Boot</div>
+    <div class="tile-desc">Bounded contexts · Spring Cloud · service discovery · gateway · config · resilience (Resilience4j) · observability</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent4)" href="2-System-Design/microservices/Microservices_Design_Patterns_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Microservices</span><span class="arrow">→</span></div>
+    <div class="tile-title">Design Patterns</div>
+    <div class="tile-desc">Decomposition · data (Saga/CQRS/Outbox) · integration (gateway/BFF/mesh) · reliability · observability · deployment</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent5)" href="2-System-Design/microservices/Microservices_Transactions_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Microservices</span><span class="arrow">→</span></div>
+    <div class="tile-title">Transaction Management</div>
+    <div class="tile-desc">Why no 2PC · Saga (choreography vs orchestration) · Outbox · idempotency · CDC · eventual consistency</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent2)" href="2-System-Design/microservices/Microservices_Patterns_Quick_Reference.html">
+    <div class="tile-top"><span class="tag">Microservices</span><span class="arrow">→</span></div>
+    <div class="tile-title">Patterns · Quick Reference</div>
+    <div class="tile-desc">One-glance pattern picker — communication · resilience · data &amp; transactions · event-driven (CQRS/ES)</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent4)" href="2-System-Design/microservices/Saga_Pattern_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Microservices</span><span class="arrow">→</span></div>
+    <div class="tile-title">Saga Pattern</div>
+    <div class="tile-desc">Local txns + compensations · choreography vs orchestration · lost isolation · idempotency</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent3)" href="2-System-Design/microservices/Outbox_Pattern_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Microservices</span><span class="arrow">→</span></div>
+    <div class="tile-title">Outbox Pattern</div>
+    <div class="tile-desc">The dual-write problem · atomic DB + event · polling vs CDC · at-least-once · idempotency</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ DATABASES ══ -->
+<div class="section-label"><span class="icon">🗄️</span>Databases &amp; Messaging <span class="count">· 6</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent8)" href="4-Data-Messaging/DB/SQL_Query_Mental_Model.html">
+    <div class="tile-top"><span class="tag">SQL</span><span class="arrow">→</span></div>
+    <div class="tile-title">SQL Query Interview</div>
+    <div class="tile-desc">Logical execution order · joins · window functions · the pattern library · NULL traps · performance</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent4)" href="4-Data-Messaging/DB/Database_Optimization_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Database</span><span class="arrow">→</span></div>
+    <div class="tile-title">DB Optimization &amp; Internals</div>
+    <div class="tile-desc">Indexes · execution plans · query tuning · transactions · isolation levels · MVCC &amp; locking</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent5)" href="4-Data-Messaging/Redis/Redis_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Redis</span><span class="arrow">→</span></div>
+    <div class="tile-title">Redis</div>
+    <div class="tile-desc">Data types · persistence (RDB/AOF) · eviction · caching patterns · cluster (16384 slots) · locks · rate limiting</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent2)" href="4-Data-Messaging/Kafka/Kafka_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Kafka</span><span class="arrow">→</span></div>
+    <div class="tile-title">Apache Kafka</div>
+    <div class="tile-desc">Commit log · partitions &amp; ordering · consumer groups · delivery semantics · acks &amp; ISR · retention/compaction</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent6)" href="4-Data-Messaging/DB/Cassandra_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Cassandra</span><span class="arrow">→</span></div>
+    <div class="tile-title">Apache Cassandra</div>
+    <div class="tile-desc">Masterless ring · partition/clustering keys · tunable consistency · LSM write path · query-first modeling</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent5)" href="4-Data-Messaging/Redis/Caching_Patterns_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Caching</span><span class="arrow">→</span></div>
+    <div class="tile-title">Caching Patterns</div>
+    <div class="tile-desc">Cache-aside · write-through/behind · TTL &amp; eviction · cache stampede · hot keys · distributed cache</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ INFRA & DEVOPS ══ -->
+<div class="section-label"><span class="icon">☁️</span>Infrastructure &amp; DevOps <span class="count">· 5</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent2)" href="5-Infra-Networking/AWS/AWS_Mental_Model.html">
+    <div class="tile-top"><span class="tag">AWS</span><span class="arrow">→</span></div>
+    <div class="tile-title">AWS Core Services</div>
+    <div class="tile-desc">Compute · storage · databases · VPC networking · messaging · IAM · observability — pick the right service</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent1)" href="5-Infra-Networking/Kubernetes_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Kubernetes</span><span class="arrow">→</span></div>
+    <div class="tile-title">Kubernetes</div>
+    <div class="tile-desc">Declarative desired state · pods &amp; controllers · services &amp; ingress · probes · scaling (HPA) · rollouts</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent8)" href="5-Infra-Networking/Docker_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Docker</span><span class="arrow">→</span></div>
+    <div class="tile-title">Docker</div>
+    <div class="tile-desc">Images &amp; layers · Dockerfile · multi-stage builds · volumes &amp; networks · compose · best practices</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent3)" href="5-Infra-Networking/CICD_Mental_Model.html">
+    <div class="tile-top"><span class="tag">CI/CD</span><span class="arrow">→</span></div>
+    <div class="tile-title">CI / CD</div>
+    <div class="tile-desc">Continuous integration &amp; delivery · pipeline stages · deploy strategies (canary/blue-green) · GitOps · quality gates</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent6)" href="5-Infra-Networking/Networking_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Networking</span><span class="arrow">→</span></div>
+    <div class="tile-title">Networking</div>
+    <div class="tile-desc">TCP/UDP · HTTP/1·2·3 · TLS · DNS · load balancer · CDN · reverse proxy · WebSocket · gRPC</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ SECURITY & API DESIGN ══ -->
+<div class="section-label"><span class="icon">🔐</span>Security &amp; API Design <span class="count">· 2</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent5)" href="5-Infra-Networking/Security_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Security</span><span class="arrow">→</span></div>
+    <div class="tile-title">Security &amp; Cryptography</div>
+    <div class="tile-desc">TLS/mTLS · JWT · OAuth2 · OIDC · SAML · encryption · hashing · signing · API security · OWASP Top 10</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent8)" href="5-Infra-Networking/API_Design_Mental_Model.html">
+    <div class="tile-top"><span class="tag">API Design</span><span class="arrow">→</span></div>
+    <div class="tile-title">API Design</div>
+    <div class="tile-desc">REST · status codes · versioning · pagination · idempotency · error handling · rate limiting · OpenAPI · HATEOAS</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ PERFORMANCE & OBSERVABILITY ══ -->
+<div class="section-label"><span class="icon">📊</span>Performance &amp; Observability <span class="count">· 2</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent5)" href="5-Infra-Networking/Performance_Engineering_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Performance</span><span class="arrow">→</span></div>
+    <div class="tile-title">Performance Engineering</div>
+    <div class="tile-desc">Latency vs throughput · P99 · bottlenecks · thread/connection pools · GC tuning · profiling · heap dumps</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent3)" href="5-Infra-Networking/Observability_Mental_Model.html">
+    <div class="tile-top"><span class="tag">Observability</span><span class="arrow">→</span></div>
+    <div class="tile-title">Observability</div>
+    <div class="tile-desc">Logs · metrics · traces · golden signals · Prometheus · Grafana · OpenTelemetry · Dynatrace · SLO/alerting</div>
+  </a>
+
+</div>
+
+<!-- ════════════════════ SYSTEM DESIGN ══ -->
+<div class="section-label"><span class="icon">📐</span>System Design <span class="count">· 2</span></div>
+<div class="grid">
+
+  <a class="tile" style="--clr:var(--accent4)" href="2-System-Design/Playbooks/cheat_sheet.html">
+    <div class="tile-top"><span class="tag">System Design</span><span class="arrow">→</span></div>
+    <div class="tile-title">Staff System Design</div>
+    <div class="tile-desc">Storage · communication · patterns · scaling · consistency · capacity formulas · 10× triggers · interviewer traps</div>
+  </a>
+
+  <a class="tile" style="--clr:var(--accent1)" href="2-System-Design/Distributed_Systems_Mental_Model.html">
+    <div class="tile-top"><span class="tag">System Design</span><span class="arrow">→</span></div>
+    <div class="tile-title">Distributed Systems</div>
+    <div class="tile-desc">CAP · consensus (Raft) · leader election · distributed locking · clocks · replication · sharding · quorum · split brain</div>
+  </a>
+
+</div>
+
+<div class="footer">
+  44 cheat sheets · consistent template · print each to PDF (Ctrl/Cmd+P)<br>
+  Deeper markdown companions: Java 8 Streams handbook &amp; SQL Query mental model (open in Obsidian)
+</div>
+
+</body>
+</html>
