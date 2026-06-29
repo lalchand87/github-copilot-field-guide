@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Engineer System Design — Cheat Sheet</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #f0ede8;
+    --surface:   #f7f5f2;
+    --card:      #ffffff;
+    --border:    #e4e0d8;
+    --border2:   #d0cbc2;
+    --text:      #1a1a1a;
+    --muted:     #6b6560;
+    --label:     #8a837a;
+    --th-bg:     #f7f5f2;
+    --row-hover: #fafaf8;
+    --highlight: #ffe566;   /* yellow highlight like screenshot */
+    --avoid-bg:  #fff1f0;
+    --avoid-txt: #c0392b;
+    --use-txt:   #1a5e35;
+    --tech-clr:  #1a1a1a;   /* bold black for tech names */
+    --mono: "JetBrains Mono", monospace;
+    --sans: "Inter", -apple-system, sans-serif;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  html { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 13px; }
+  body { padding: 28px 32px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .masthead {
+    display: flex; align-items: baseline; justify-content: space-between;
+    border-bottom: 2px solid var(--border2); padding-bottom: 14px; margin-bottom: 32px;
+  }
+  .masthead h1 { font-size: 14px; font-weight: 600; letter-spacing: .02em; color: var(--text); }
+  .masthead h1 span { color: #2563eb; }
+  .masthead p  { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+
+  /* ── Section label — matches screenshot style ── */
+  .section-label {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text);
+    margin: 32px 0 12px;
+  }
+  .section-label .icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 4px;
+    background: var(--border2); flex-shrink: 0;
+    font-size: 10px; color: var(--text);
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); margin-left: 4px; }
+
+  /* ── Grid layouts ── */
+  .grid-2  { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .grid-3  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-4  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+  /* ── Card — white with subtle shadow, rounded ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px 9px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .card-header .dot {
+    width: 7px; height: 7px; border-radius: 2px;
+    background: var(--card-color, #6b6560); flex-shrink: 0;
+  }
+  .card-header h3 {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--text);
+  }
+
+  /* ── Table — matches screenshot closely ── */
+  .card table { width: 100%; border-collapse: collapse; }
+  .card table th {
+    font-size: 9.5px; font-weight: 600; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--label);
+    padding: 7px 14px 6px; text-align: left;
+    background: var(--th-bg);
+    border-bottom: 1px solid var(--border);
+  }
+  .card table td {
+    padding: 7px 14px; font-size: 12.5px; color: var(--text);
+    border-bottom: 1px solid var(--border); vertical-align: middle;
+    line-height: 1.4; background: var(--card);
+  }
+  .card table tr:last-child td { border-bottom: none; }
+  .card table tr:hover td { background: var(--row-hover); }
+
+  /* First column: bold monospace tech name like screenshot */
+  .card table td:first-child {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--tech-clr); white-space: nowrap;
+  }
+  .card table td.dim   { color: var(--muted); }
+  .card table td.avoid { color: var(--avoid-txt); }
+  .card table td.use   { color: var(--use-txt); }
+
+  /* Yellow highlight on key terms */
+  .hl { background: var(--highlight); border-radius: 2px; padding: 0 2px; }
+
+  /* ── Tree inside card ── */
+  .tree { padding: 10px 14px 12px; }
+  .tree-q { font-size: 11px; font-weight:600; color: var(--text); margin-bottom:4px; }
+  .tree-branch { display: flex; align-items: flex-start; gap: 0; padding: 2px 0 2px 8px; }
+  .tree-arrow  { color: var(--border2); font-size: 12px; flex-shrink: 0; margin-top:1px; font-family: var(--mono); }
+  .tree-answer { font-family: var(--mono); font-size: 11.5px; font-weight:600; color: #1d4ed8; margin-left:6px; }
+  .tree-note   { font-size: 11px; color: var(--muted); margin-left: 4px; margin-top: 1px; }
+  .tree-sep    { border: none; border-top: 1px solid var(--border); margin: 9px 0; }
+  .tree-title  { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--label); margin-bottom: 6px; }
+
+  /* ── Formula rows ── */
+  .formula-list { padding: 4px 0; }
+  .formula-row {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 6px 14px; border-bottom: 1px solid var(--border); font-size: 12px;
+  }
+  .formula-row:last-child { border-bottom: none; }
+  .formula-key { color: var(--muted); min-width: 140px; flex-shrink: 0; }
+  .formula-val { font-family: var(--mono); font-size: 11px; color: #1d4ed8; font-weight: 500; }
+
+  /* ── Constants ── */
+  .const-group { padding: 8px 14px 4px; }
+  .const-group h4 { font-size: 9.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--label); margin-bottom: 5px; }
+  .const-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .const-row:last-child { border-bottom: none; }
+  .const-label { color: var(--muted); }
+  .const-val { font-family: var(--mono); font-size: 11.5px; color: var(--text); font-weight: 500; }
+  .const-group + .const-group { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 2px; }
+
+  /* ── SLO rows ── */
+  .slo-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .slo-row:last-child { border-bottom: none; }
+  .slo-pct { font-family: var(--mono); font-weight: 600; color: var(--text); }
+  .slo-nines { color: var(--muted); font-size: 10.5px; min-width: 70px; }
+  .slo-down.bad  { color: #dc2626; font-weight: 500; }
+  .slo-down.ok   { color: #d97706; font-weight: 500; }
+  .slo-down.good { color: #16a34a; font-weight: 500; }
+
+  /* ── CAP rows ── */
+  .cap-row { padding: 6px 14px; border-bottom: 1px solid var(--border); font-size: 12px; display: flex; gap: 10px; align-items: flex-start; }
+  .cap-row:last-child { border-bottom: none; }
+  .cap-label { font-family: var(--mono); font-size: 11px; font-weight: 600; flex-shrink: 0; min-width: 60px; }
+  .cap-label.cp { color: #dc2626; }
+  .cap-label.ap { color: #d97706; }
+  .cap-label.pc { color: #7c3aed; }
+  .cap-desc { color: var(--muted); line-height: 1.4; }
+
+  /* ── Recognition rows ── */
+  .recog-row { display: flex; gap: 0; padding: 5px 14px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+  .recog-row:last-child { border-bottom: none; }
+  .recog-signal { color: var(--muted); font-style: italic; flex: 1; font-size: 11.5px; }
+  .recog-arrow { color: var(--border2); padding: 0 10px; }
+  .recog-pattern { font-family: var(--mono); font-size: 11px; font-weight: 600; color: #1d4ed8; white-space: nowrap; min-width: 120px; text-align: right; }
+
+  /* ── 10x trigger rows ── */
+  .trigger-row { display: flex; gap: 0; padding: 5px 10px; border-bottom: 1px solid var(--border); font-size: 11.5px; align-items: flex-start; }
+  .trigger-row:last-child { border-bottom: none; }
+  .trigger-stage { color: #1d4ed8; font-family: var(--mono); font-size: 10.5px; font-weight: 500; min-width: 120px; flex-shrink: 0; padding-top: 1px; }
+  .trigger-signal { color: var(--muted); flex: 1; line-height: 1.4; font-size: 11px; }
+  .trigger-arrow  { color: var(--border2); padding: 0 6px; flex-shrink: 0; }
+  .trigger-next   { color: #16a34a; font-family: var(--mono); font-size: 10.5px; font-weight: 500; min-width: 140px; flex-shrink: 0; padding-top: 1px; text-align: right; }
+
+  /* ── 4 golden signals mini-cards ── */
+  .signal-mini { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 9px; }
+  .signal-mini .name { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .signal-mini .desc { color: var(--muted); font-size: 10.5px; margin-top: 1px; }
+
+  /* ── Sub-section divider ── */
+  .sub-th { font-size: 9.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--label); padding: 7px 14px 5px; background: var(--surface); border-bottom: 1px solid var(--border); border-top: 1px solid var(--border); }
+
+  /* ── Print ── */
+  @media print {
+    body { padding: 12px; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <h1>Staff Engineer <span>System Design</span> — Cheat Sheet</h1>
+  <p>Handbook + Playbook · All reference material in one place</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════ STORAGE ══ -->
+<div class="section-label"><span class="icon">▦</span>Storage</div>
+<div class="grid-2">
+
+  <div class="card c1">
+    <div class="card-header" style="--card-color: var(--accent1)">
+      <div class="dot" style="background:#2563eb"></div><h3>Databases — Use When / Avoid When</h3>
+    </div>
+    <table>
+      <thead><tr><th>Technology</th><th>Use when</th><th>Avoid when</th></tr></thead>
+      <tbody>
+        <tr><td>PostgreSQL</td><td class="use">ACID, transactions, joins, financial</td><td class="avoid">Massive cross-region writes</td></tr>
+        <tr><td>MySQL</td><td class="use">General OLTP workloads</td><td class="avoid">Complex analytics</td></tr>
+        <tr><td>Redis</td><td class="use">Cache, sessions, rate limiting</td><td class="avoid">Long-term durable storage</td></tr>
+        <tr><td>Cassandra</td><td class="use">Massive writes, global scale, time-series</td><td class="avoid">Complex joins, strong consistency</td></tr>
+        <tr><td>MongoDB</td><td class="use">Flexible schema, document-oriented</td><td class="avoid">Strong relational modeling</td></tr>
+        <tr><td>S3 / GCS</td><td class="use">Objects, backups, data lake</td><td class="avoid">Low-latency queries</td></tr>
+        <tr><td>Elasticsearch</td><td class="use">Full-text search, facets, ranking</td><td class="avoid">Primary database</td></tr>
+        <tr><td>Neo4j</td><td class="use">Relationship-heavy data, graph traversal</td><td class="avoid">OLTP volumes, simple CRUD</td></tr>
+        <tr><td>ClickHouse</td><td class="use">Columnar analytics, fast aggregations</td><td class="avoid">Transactional writes</td></tr>
+        <tr><td>TimescaleDB</td><td class="use">Time-series metrics, IoT, telemetry</td><td class="avoid">Complex relational joins</td></tr>
+        <tr><td>CockroachDB</td><td class="use">Multi-region ACID, distributed SQL</td><td class="avoid">High write throughput (latency cost)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c1">
+    <div class="card-header" style="--card-color: var(--accent1)">
+      <div class="dot" style="background:#2563eb"></div><h3>Database Decision Tree</h3>
+    </div>
+    <div class="tree">
+      <div class="tree-q">What is the primary access pattern?</div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Structured + transactions + joins</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">PostgreSQL</span><span class="tree-note"> (default) → Cassandra if >100K writes/sec → CockroachDB if multi-region ACID</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Key-value, &lt;1ms reads, cache</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Redis</span><span class="tree-note"> → Cluster if HA needed</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Full-text search, relevance, facets</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Elasticsearch</span><span class="tree-note"> alongside primary DB, never instead</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Document / flexible schema</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">MongoDB</span><span class="tree-note"> (watch: eventual consistency default)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Time-series / metrics / IoT</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">TimescaleDB</span><span class="tree-note"> or InfluxDB</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Graph traversal / social permissions</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Neo4j</span><span class="tree-note"> or Amazon Neptune</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Analytics, large aggregations</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">ClickHouse</span><span class="tree-note"> (self-hosted) · BigQuery/Redshift (managed)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">└─</span><div><span class="tree-note">Object storage, files, backups</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">S3</span><span class="tree-note"> / GCS / Azure Blob</span></div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ COMMUNICATION ══ -->
+<div class="section-label"><span class="icon">⇄</span>Communication</div>
+<div class="grid-2">
+
+  <div class="card c2">
+    <div class="card-header" style="--card-color: var(--accent2)">
+      <div class="dot" style="background:#d97706"></div><h3>Protocols — Use When / Avoid When</h3>
+    </div>
+    <table>
+      <thead><tr><th>Technology</th><th>Use when</th><th>Avoid when</th></tr></thead>
+      <tbody>
+        <tr><td>REST / HTTP</td><td class="use">Public APIs, broad compatibility</td><td class="avoid">Ultra-low latency internal calls</td></tr>
+        <tr><td>gRPC</td><td class="use">Service-to-service, strong typing, streaming</td><td class="avoid">Browser clients</td></tr>
+        <tr><td>GraphQL</td><td class="use">Multiple client types, client-driven queries</td><td class="avoid">Simple uniform APIs</td></tr>
+        <tr><td>WebSockets</td><td class="use">Real-time bidirectional (chat, collab, gaming)</td><td class="avoid">Server-to-client only updates</td></tr>
+        <tr><td>SSE</td><td class="use">Server → client push (notifications, live feeds)</td><td class="avoid">Client needs to send data back</td></tr>
+        <tr><td>Long Polling</td><td class="use">Near-realtime, restrictive proxies/firewalls</td><td class="avoid">High message frequency</td></tr>
+        <tr><td>WebRTC</td><td class="use">Peer-to-peer audio/video, browser-native</td><td class="avoid">Server-mediated data</td></tr>
+        <tr><td>Kafka</td><td class="use">Event streaming, replay, fan-out</td><td class="avoid">Request-response patterns</td></tr>
+        <tr><td>RabbitMQ / SQS</td><td class="use">Task queues, simple async work</td><td class="avoid">Event replay needed</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c2">
+    <div class="card-header" style="--card-color: var(--accent2)">
+      <div class="dot" style="background:#d97706"></div><h3>Messaging + Real-Time Decision Trees</h3>
+    </div>
+    <div class="tree">
+      <div class="tree-q" style="font-weight:600; color:var(--text); font-size:11px; margin-bottom:6px;">MESSAGING</div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Need request-response?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">REST / gRPC</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Async task queue, no replay?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">RabbitMQ / SQS</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Event streaming, multiple consumers, replay?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Kafka</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">└─</span><div><span class="tree-note">In-process, same JVM?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Spring Events / Guava EventBus</span></div></div></div>
+      <hr class="tree-sep">
+      <div class="tree-q" style="font-weight:600; color:var(--text); font-size:11px; margin-bottom:6px;">REAL-TIME</div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Client also sends data?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">WebSockets</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Server pushes only, browser client?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">SSE</span><span class="tree-note"> (HTTP/2, auto-reconnect)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Update frequency low (&gt;1s)?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Long Polling</span><span class="tree-note"> (simpler, works everywhere)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">└─</span><div><span class="tree-note">Peer-to-peer audio/video?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">WebRTC</span><span class="tree-note"> (STUN/TURN, E2E encrypted)</span></div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════════════════════════════════════ PATTERNS ══ -->
+<div class="section-label"><span class="icon">◈</span>Patterns</div>
+<div class="grid-4">
+
+  <div class="card c3">
+    <div class="card-header" style="--card-color: var(--accent3)">
+      <div class="dot" style="background:#16a34a"></div><h3>Data Access</h3>
+    </div>
+    <table>
+      <thead><tr><th>Pattern</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>CRUD</td><td class="dim">Standard business apps</td></tr>
+        <tr><td>Event Sourcing</td><td class="dim">Audit trail required</td></tr>
+        <tr><td>CQRS</td><td class="dim">Read-heavy, different read/write models</td></tr>
+        <tr><td>Materialized Views</td><td class="dim">Expensive aggregations</td></tr>
+        <tr><td>Outbox Pattern</td><td class="dim">Reliable event publishing with DB</td></tr>
+        <tr><td>CDC</td><td class="dim">Stream DB changes to downstream systems</td></tr>
+        <tr><td>Read Replicas</td><td class="dim">Scale reads independently</td></tr>
+        <tr><td>Sharding</td><td class="dim">DB exceeds one node capacity</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c5">
+    <div class="card-header" style="--card-color: var(--accent5)">
+      <div class="dot" style="background:#dc2626"></div><h3>Reliability</h3>
+    </div>
+    <table>
+      <thead><tr><th>Pattern</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>Retry</td><td class="dim">Transient failures (with backoff + jitter)</td></tr>
+        <tr><td>Timeout</td><td class="dim">Prevent indefinitely hanging calls</td></tr>
+        <tr><td>Circuit Breaker</td><td class="dim">Downstream dependency failing</td></tr>
+        <tr><td>Bulkhead</td><td class="dim">Prevent one dependency from cascading</td></tr>
+        <tr><td>Fallback</td><td class="dim">Graceful degradation under failure</td></tr>
+        <tr><td>DLQ</td><td class="dim">Poison messages blocking consumers</td></tr>
+        <tr><td>Idempotency</td><td class="dim">Payments, retries, exactly-once</td></tr>
+        <tr><td>Saga</td><td class="dim">Distributed transactions across services</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c4">
+    <div class="card-header" style="--card-color: var(--accent4)">
+      <div class="dot" style="background:#7c3aed"></div><h3>Scaling</h3>
+    </div>
+    <table>
+      <thead><tr><th>Technique</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>Indexes</td><td class="dim">Slow queries — free, always first</td></tr>
+        <tr><td>Cache (Redis)</td><td class="dim">Read bottleneck, hot data</td></tr>
+        <tr><td>Read Replicas</td><td class="dim">Read scaling, query offload</td></tr>
+        <tr><td>Partitioning</td><td class="dim">Large tables (&gt;100M rows)</td></tr>
+        <tr><td>Sharding</td><td class="dim">DB size exceeds one node</td></tr>
+        <tr><td>CDN</td><td class="dim">Static content, global delivery</td></tr>
+        <tr><td>Load Balancing</td><td class="dim">Multiple stateless servers</td></tr>
+        <tr><td>Autoscaling</td><td class="dim">Variable / spiky traffic</td></tr>
+        <tr><td>Write Queue</td><td class="dim">Write rate &gt; DB can absorb</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c6">
+    <div class="card-header" style="--card-color: var(--accent6)">
+      <div class="dot" style="background:#0891b2"></div><h3>Security</h3>
+    </div>
+    <table>
+      <thead><tr><th>Technology</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>Session</td><td class="dim">Traditional web apps, immediate revocation</td></tr>
+        <tr><td>JWT</td><td class="dim">Stateless APIs, microservices</td></tr>
+        <tr><td>OAuth2</td><td class="dim">Delegated access to third-party data</td></tr>
+        <tr><td>OIDC</td><td class="dim">Authentication + identity (on top of OAuth2)</td></tr>
+        <tr><td>SAML</td><td class="dim">Enterprise SSO, legacy IdPs</td></tr>
+        <tr><td>mTLS</td><td class="dim">Service-to-service mutual authentication</td></tr>
+        <tr><td>RBAC</td><td class="dim">Role-based coarse-grained permissions</td></tr>
+        <tr><td>ABAC</td><td class="dim">Attribute-based fine-grained rules</td></tr>
+        <tr><td>ReBAC</td><td class="dim">Relationship-based access (Zanzibar)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ CONSISTENCY + OBS ══ -->
+<div class="grid-3" style="margin-top:12px">
+
+  <div class="card c7">
+    <div class="card-header" style="--card-color: var(--accent7)">
+      <div class="dot" style="background:#d97706"></div><h3>Consistency</h3>
+    </div>
+    <table>
+      <thead><tr><th>Model</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>Strong / Linearisable</td><td class="dim">Payments, locks, permissions, inventory</td></tr>
+        <tr><td>Eventual</td><td class="dim">Social media, likes, DNS, CDN</td></tr>
+        <tr><td>Quorum (W+R&gt;N)</td><td class="dim">Cassandra, DynamoDB tunable</td></tr>
+        <tr><td>Read-Your-Writes</td><td class="dim">Profile updates, post-write redirect</td></tr>
+        <tr><td>Monotonic Reads</td><td class="dim">Prevent data appearing to go backwards</td></tr>
+        <tr><td>Causal</td><td class="dim">Comments/replies must show in order</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c7" style="--card-color: var(--accent7)">
+    <div class="card-header" style="--card-color: var(--accent7)">
+      <div class="dot" style="background:#d97706"></div><h3>Consistency Decision Tree</h3>
+    </div>
+    <div class="tree">
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Money, security, or inventory?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Strong consistency</span><span class="tree-note"> — PostgreSQL sync commit</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">User must see their own writes?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Read-your-writes</span><span class="tree-note"> — route reads to primary after write</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Data must never appear to go back?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Monotonic reads</span><span class="tree-note"> — pin session to one replica</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">└─</span><div><span class="tree-note">Staleness OK? (likes, feed, counts)</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Eventual consistency</span><span class="tree-note"> — Cassandra / Redis async</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="card c8">
+    <div class="card-header" style="--card-color: var(--accent8)">
+      <div class="dot" style="background:#0284c7"></div><h3>Observability</h3>
+    </div>
+    <table>
+      <thead><tr><th>Tool</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>Logs</td><td class="dim">Debugging incidents, post-mortem investigation</td></tr>
+        <tr><td>Metrics</td><td class="dim">Continuous monitoring, SLO tracking, alerting</td></tr>
+        <tr><td>Tracing</td><td class="dim">Cross-service latency attribution</td></tr>
+        <tr><td>Alerts</td><td class="dim">Operational response, on-call trigger</td></tr>
+        <tr><td>Dashboards</td><td class="dim">System visibility, team health review</td></tr>
+      </tbody>
+    </table>
+    <div style="padding: 8px 12px; border-top: 1px solid var(--border);">
+      <div style="font-size:10px; color:var(--muted); font-weight:600; letter-spacing:.08em; margin-bottom:6px;">FOUR GOLDEN SIGNALS</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+        <div style="background:var(--surface); border-radius:4px; padding:5px 8px; font-size:11px;"><span style="color:var(--accent5); font-family:var(--mono)">Latency</span><div style="color:var(--muted); font-size:10px">p99 per endpoint</div></div>
+        <div style="background:var(--surface); border-radius:4px; padding:5px 8px; font-size:11px;"><span style="color:var(--accent2); font-family:var(--mono)">Traffic</span><div style="color:var(--muted); font-size:10px">req/sec by service</div></div>
+        <div style="background:var(--surface); border-radius:4px; padding:5px 8px; font-size:11px;"><span style="color:var(--accent5); font-family:var(--mono)">Errors</span><div style="color:var(--muted); font-size:10px">5xx rate %</div></div>
+        <div style="background:var(--surface); border-radius:4px; padding:5px 8px; font-size:11px;"><span style="color:var(--accent3); font-family:var(--mono)">Saturation</span><div style="color:var(--muted); font-size:10px">CPU, mem, queue</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ ARCHITECTURE ══ -->
+<div class="section-label"><span class="icon">⬡</span>Architecture Patterns</div>
+<div class="grid-3">
+
+  <div class="card c9">
+    <div class="card-header" style="--card-color: var(--accent9)">
+      <div class="dot" style="background:#6d28d9"></div><h3>Architecture Pattern Selection</h3>
+    </div>
+    <table>
+      <thead><tr><th>Pattern</th><th>Use when</th></tr></thead>
+      <tbody>
+        <tr><td>Monolith</td><td class="dim">Small team (&lt;15 engineers), evolving domain</td></tr>
+        <tr><td>Modular Monolith</td><td class="dim">Clear module APIs, single deploy, pre-microservices</td></tr>
+        <tr><td>Microservices</td><td class="dim">Multiple teams, stable domain boundaries</td></tr>
+        <tr><td>BFF</td><td class="dim">Multiple client types with different data needs</td></tr>
+        <tr><td>Strangler Fig</td><td class="dim">Migrating legacy incrementally</td></tr>
+        <tr><td>Event-Driven</td><td class="dim">Loose coupling, async workflows</td></tr>
+        <tr><td>CQRS</td><td class="dim">Read-heavy, read/write model mismatch</td></tr>
+        <tr><td>Event Sourcing</td><td class="dim">Full audit trail, replay required</td></tr>
+        <tr><td>Saga</td><td class="dim">Distributed transactions across services</td></tr>
+        <tr><td>Service Mesh</td><td class="dim">mTLS + circuit breaking without code changes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c9">
+    <div class="card-header" style="--card-color: var(--accent9)">
+      <div class="dot" style="background:#6d28d9"></div><h3>Multi-Region + Load Balancing</h3>
+    </div>
+    <table>
+      <thead><tr><th colspan="2">Multi-Region</th></tr></thead>
+      <tbody>
+        <tr><td>Active-Passive</td><td class="dim">Simpler DR, correctness over availability</td></tr>
+        <tr><td>Active-Active</td><td class="dim">Global systems, low-latency worldwide</td></tr>
+        <tr><td>Geo Routing</td><td class="dim">Route users to nearest healthy region</td></tr>
+        <tr><td>Data Sovereignty</td><td class="dim">Regulatory requirements (RBI, GDPR)</td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:4px">
+      <thead><tr><th colspan="2">Load Balancing</th></tr></thead>
+      <tbody>
+        <tr><td>Round Robin</td><td class="dim">Uniform, homogeneous requests</td></tr>
+        <tr><td>Least Connections</td><td class="dim">Variable request duration</td></tr>
+        <tr><td>IP Hash</td><td class="dim">Sticky sessions (prefer externalising state)</td></tr>
+        <tr><td>Consistent Hash</td><td class="dim">Cache clusters, minimise key remapping</td></tr>
+      </tbody>
+    </table>
+    <table style="margin-top:4px">
+      <thead><tr><th colspan="2">Partitioning</th></tr></thead>
+      <tbody>
+        <tr><td>Range</td><td class="dim">Time-based data, archival</td></tr>
+        <tr><td>Hash</td><td class="dim">Uniform distribution, avoid hotspots</td></tr>
+        <tr><td>Directory</td><td class="dim">Custom routing logic</td></tr>
+        <tr><td>Geo-based</td><td class="dim">Multi-region, data residency</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card c9">
+    <div class="card-header" style="--card-color: var(--accent9)">
+      <div class="dot" style="background:#6d28d9"></div><h3>Authentication Decision Tree</h3>
+    </div>
+    <div class="tree">
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">User login only, immediate revocation?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">Session</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Stateless APIs, microservices?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">JWT</span><span class="tree-note"> (15-min TTL + refresh tokens)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Delegated access to third-party data?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">OAuth2</span><span class="tree-note"> (Authorization Code + PKCE for SPA/mobile)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Authentication + user identity claims?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">OIDC</span><span class="tree-note"> (OAuth2 + id_token)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">├─</span><div><span class="tree-note">Enterprise SSO, legacy IdP?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">SAML</span><span class="tree-note"> (XML, mature, use OIDC for new)</span></div></div></div>
+      <div class="tree-branch"><span class="tree-arrow">└─</span><div><span class="tree-note">Service-to-service (machine-to-machine)?</span><div class="tree-branch"><span class="tree-arrow">└─</span><span class="tree-answer">OAuth2 Client Credentials</span><span class="tree-note"> or mTLS</span></div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ CAPACITY ══ -->
+<div class="section-label"><span class="icon">≈</span>Capacity Estimation</div>
+<div class="grid-3">
+
+  <div class="card c10">
+    <div class="card-header" style="--card-color: var(--accent10)">
+      <div class="dot" style="background:#92400e"></div><h3>Formulas</h3>
+    </div>
+    <div class="formula-list">
+      <div class="formula-row"><span class="formula-key">QPS (average)</span><span class="formula-val">DAU × actions/day ÷ 86,400</span></div>
+      <div class="formula-row"><span class="formula-key">QPS (peak)</span><span class="formula-val">avg × 2–10× (consumer: 5–10×)</span></div>
+      <div class="formula-row"><span class="formula-key">Storage / day</span><span class="formula-val">write_QPS × 86,400 × row_size</span></div>
+      <div class="formula-row"><span class="formula-key">Storage / year</span><span class="formula-val">daily × 365 × 3 (repl) × 0.5 (compress)</span></div>
+      <div class="formula-row"><span class="formula-key">Bandwidth out</span><span class="formula-val">read_QPS × avg_response_size</span></div>
+      <div class="formula-row"><span class="formula-key">Cache size</span><span class="formula-val">hot_dataset × 2.5 (Redis overhead)</span></div>
+      <div class="formula-row"><span class="formula-key">Kafka partitions</span><span class="formula-val">throughput_MB/s ÷ 10 MB/s/partition</span></div>
+      <div class="formula-row"><span class="formula-key">DB connections</span><span class="formula-val">QPS × avg_latency_sec × safety(1.5)</span></div>
+      <div class="formula-row"><span class="formula-key">Workers needed</span><span class="formula-val">peak_jobs/s × avg_duration_s × 1.5</span></div>
+      <div class="formula-row"><span class="formula-key">WebSocket memory</span><span class="formula-val">connections × 13 KB per connection</span></div>
+    </div>
+  </div>
+
+  <div class="card c10">
+    <div class="card-header" style="--card-color: var(--accent10)">
+      <div class="dot" style="background:#92400e"></div><h3>Constants to Memorise</h3>
+    </div>
+    <div class="const-group">
+      <h4>Time</h4>
+      <div class="const-row"><span class="const-label">1 day</span><span class="const-val">86,400 sec ← memorise</span></div>
+      <div class="const-row"><span class="const-label">1 month</span><span class="const-val">~2.6M sec</span></div>
+      <div class="const-row"><span class="const-label">1 year</span><span class="const-val">~31.5M sec</span></div>
+    </div>
+    <div class="const-group">
+      <h4>Storage</h4>
+      <div class="const-row"><span class="const-label">UUID string</span><span class="const-val">36 bytes</span></div>
+      <div class="const-row"><span class="const-label">Typical DB row</span><span class="const-val">100–500 bytes</span></div>
+      <div class="const-row"><span class="const-label">JSON API response</span><span class="const-val">1–10 KB</span></div>
+      <div class="const-row"><span class="const-label">Profile photo</span><span class="const-val">50–200 KB</span></div>
+      <div class="const-row"><span class="const-label">1 min HD video</span><span class="const-val">~50 MB</span></div>
+      <div class="const-row"><span class="const-label">1 hr HD video</span><span class="const-val">~3 GB</span></div>
+    </div>
+    <div class="const-group">
+      <h4>Latency</h4>
+      <div class="const-row"><span class="const-label">In-process cache</span><span class="const-val">~50 ns</span></div>
+      <div class="const-row"><span class="const-label">Redis GET</span><span class="const-val">~0.5–1 ms</span></div>
+      <div class="const-row"><span class="const-label">PostgreSQL simple</span><span class="const-val">1–5 ms</span></div>
+      <div class="const-row"><span class="const-label">PostgreSQL join</span><span class="const-val">5–20 ms</span></div>
+      <div class="const-row"><span class="const-label">Same DC network</span><span class="const-val">~0.5 ms</span></div>
+      <div class="const-row"><span class="const-label">Cross-region</span><span class="const-val">50–200 ms</span></div>
+      <div class="const-row"><span class="const-label">SSD random read</span><span class="const-val">~0.1 ms</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent10)">
+      <div class="dot-skip" style="background:var(--accent10)"></div><h3>SLO / Downtime + CAP Reference</h3>
+    </div>
+    <div style="padding: 6px 0">
+      <div class="slo-row" style="border-bottom: 1px solid var(--border2); padding-bottom:4px; margin-bottom:2px">
+        <span style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em">SLO</span>
+        <span style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em">MONTHLY</span>
+        <span style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em">YEARLY</span>
+      </div>
+      <div class="slo-row"><span class="slo-pct">99%</span><span class="slo-nines">two nines</span><span class="slo-down bad">7.3 h</span><span class="slo-down bad" style="font-size:10.5px">3.65 d</span></div>
+      <div class="slo-row"><span class="slo-pct">99.9%</span><span class="slo-nines">three nines</span><span class="slo-down ok">43.8 m</span><span class="slo-down ok" style="font-size:10.5px">8.76 h</span></div>
+      <div class="slo-row"><span class="slo-pct">99.95%</span><span class="slo-nines"></span><span class="slo-down ok">21.9 m</span><span class="slo-down ok" style="font-size:10.5px">4.38 h</span></div>
+      <div class="slo-row"><span class="slo-pct">99.99%</span><span class="slo-nines">four nines</span><span class="slo-down good">4.38 m</span><span class="slo-down good" style="font-size:10.5px">52.6 m</span></div>
+      <div class="slo-row"><span class="slo-pct">99.999%</span><span class="slo-nines">five nines</span><span class="slo-down good">26 s</span><span class="slo-down good" style="font-size:10.5px">5.26 m</span></div>
+    </div>
+    <div style="border-top: 1px solid var(--border2); padding: 8px 12px;">
+      <div style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em; margin-bottom:6px">CAP / PACELC</div>
+      <div class="cap-row"><span class="cap-label cp">CP</span><span class="cap-desc">Returns errors during partition. ZooKeeper, etcd, PostgreSQL sync replication.</span></div>
+      <div class="cap-row"><span class="cap-label ap">AP</span><span class="cap-desc">Serves stale data during partition. Cassandra, DynamoDB, CouchDB.</span></div>
+      <div class="cap-row" style="border:none"><span class="cap-label pc">PACELC</span><span class="cap-desc">No partition? Choose: EC (low latency) or EC (strong consistency).</span></div>
+    </div>
+    <div style="border-top: 1px solid var(--border2); padding: 8px 12px;">
+      <div style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em; margin-bottom:6px">IDEMPOTENCY PATTERNS</div>
+      <div style="font-size:11px; color:var(--muted); line-height:1.7">
+        <div>• <span style="color:var(--accent3); font-family:var(--mono)">Client UUID</span> — generated before first send; same key on retry</div>
+        <div>• <span style="color:var(--accent3); font-family:var(--mono)">PUT / upsert</span> — natural idempotency, no key needed</div>
+        <div>• <span style="color:var(--accent3); font-family:var(--mono)">ON CONFLICT DO NOTHING</span> — deduplicate by event_id in DB</div>
+        <div>• <span style="color:var(--accent3); font-family:var(--mono)">Kafka enable.idempotence=true</span> — producer dedup</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════ PATTERN RECOGNITION ══ -->
+<div class="section-label"><span class="icon">◎</span>Pattern Recognition — Signal Words</div>
+<div class="grid-2">
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent9)">
+      <div class="dot-skip" style="background:var(--accent9)"></div><h3>Problem Signal → Pattern</h3>
+    </div>
+    <div style="padding: 4px 0">
+      <div class="recog-row"><span class="recog-signal">"real-time", "live", "push", "instant"</span><span class="recog-arrow">→</span><span class="recog-pattern">P1: Real-Time</span></div>
+      <div class="recog-row"><span class="recog-signal">"concurrent", "reserve", "last item", "race condition"</span><span class="recog-arrow">→</span><span class="recog-pattern">P2: Contention</span></div>
+      <div class="recog-row"><span class="recog-signal">"workflow", "steps", "process", "order fulfillment"</span><span class="recog-arrow">→</span><span class="recog-pattern">P3: Multi-Step</span></div>
+      <div class="recog-row"><span class="recog-signal">"read-heavy", "cache", "frequently accessed", "catalog"</span><span class="recog-arrow">→</span><span class="recog-pattern">P4: Scale Reads</span></div>
+      <div class="recog-row"><span class="recog-signal">"analytics", "events", "logging", "telemetry", "write-heavy"</span><span class="recog-arrow">→</span><span class="recog-pattern">P5: Scale Writes</span></div>
+      <div class="recog-row"><span class="recog-signal">"upload", "download", "file", "video", "image"</span><span class="recog-arrow">→</span><span class="recog-pattern">P6: Large Blobs</span></div>
+      <div class="recog-row"><span class="recog-signal">"background", "async", "transcode", "report"</span><span class="recog-arrow">→</span><span class="recog-pattern">P7: Long Tasks</span></div>
+      <div class="recog-row"><span class="recog-signal">"search", "query", "find", "autocomplete", "full-text"</span><span class="recog-arrow">→</span><span class="recog-pattern">P8: Search</span></div>
+      <div class="recog-row"><span class="recog-signal">"notify", "alert", "send", "push notification", "email"</span><span class="recog-arrow">→</span><span class="recog-pattern">P9: Notifications</span></div>
+      <div class="recog-row"><span class="recog-signal">"throttle", "rate", "limit", "abuse", "quota"</span><span class="recog-arrow">→</span><span class="recog-pattern">P10: Rate Limit</span></div>
+      <div class="recog-row"><span class="recog-signal">"schedule", "cron", "reminder", "recurring", "billing"</span><span class="recog-arrow">→</span><span class="recog-pattern">P11: Scheduling</span></div>
+      <div class="recog-row"><span class="recog-signal">"atomic across services", "exactly-once", "compensate"</span><span class="recog-arrow">→</span><span class="recog-pattern">P12: Dist. Txn</span></div>
+      <div class="recog-row"><span class="recog-signal">"global", "worldwide", "region", "data residency"</span><span class="recog-arrow">→</span><span class="recog-pattern">P13: Multi-Region</span></div>
+      <div class="recog-row"><span class="recog-signal">"event", "publish", "subscribe", "stream", "audit"</span><span class="recog-arrow">→</span><span class="recog-pattern">P14: Event-Driven</span></div>
+      <div class="recog-row"><span class="recog-signal">"API", "gateway", "auth", "routing", "entry point"</span><span class="recog-arrow">→</span><span class="recog-pattern">P15: API Gateway</span></div>
+      <div class="recog-row"><span class="recog-signal">"search ranking", "recommendation", "personalisation"</span><span class="recog-arrow">→</span><span class="recog-pattern">P16: Search+Rank</span></div>
+      <div class="recog-row"><span class="recog-signal">"metrics platform", "fraud analytics", "dashboard"</span><span class="recog-arrow">→</span><span class="recog-pattern">P17: Analytics</span></div>
+      <div class="recog-row"><span class="recog-signal">"CDC", "data sync", "pipeline", "OLTP to OLAP"</span><span class="recog-arrow">→</span><span class="recog-pattern">P18: Data Sync</span></div>
+      <div class="recog-row"><span class="recog-signal">"IAM platform", "feature flags", "developer portal"</span><span class="recog-arrow">→</span><span class="recog-pattern">P19: Platform</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header" style="--card-color: var(--accent4)">
+      <div class="dot-skip" style="background:var(--accent4)"></div><h3>10× Trigger Table — When to Evolve</h3>
+    </div>
+    <div style="padding: 4px 0">
+      <div style="display:grid; grid-template-columns: 110px 1fr 10px 120px; gap:0; padding: 5px 10px; border-bottom:1px solid var(--border2)">
+        <span style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em">CURRENT</span>
+        <span style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em">BREAKING SIGNAL</span>
+        <span></span>
+        <span style="font-size:9.5px; color:var(--muted); font-weight:600; letter-spacing:.08em">NEXT STAGE</span>
+      </div>
+      <div class="trigger-row"><span class="trigger-stage">Single DB</span><span class="trigger-signal">Query p99 &gt; SLO; seq scans</span><span class="trigger-arrow">→</span><span class="trigger-next">Add indexes first</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Indexed DB</span><span class="trigger-signal">DB CPU &gt;60% from query count</span><span class="trigger-arrow">→</span><span class="trigger-next">Read replicas</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Read replicas</span><span class="trigger-signal">Replica lag &gt;1s; replicas saturated</span><span class="trigger-arrow">→</span><span class="trigger-next">Redis cache</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Redis cache</span><span class="trigger-signal">Hit ratio &lt;60%; invalidation complex</span><span class="trigger-arrow">→</span><span class="trigger-next">CQRS + read model</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Direct writes</span><span class="trigger-signal">Write latency &gt;50ms; DB I/O at limit</span><span class="trigger-arrow">→</span><span class="trigger-next">PgBouncer + batch</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Batching</span><span class="trigger-signal">Consumer lag grows despite batching</span><span class="trigger-arrow">→</span><span class="trigger-next">Kafka write buffer</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Kafka + single DB</span><span class="trigger-signal">DB WAL at disk limit; &gt;100M rows</span><span class="trigger-arrow">→</span><span class="trigger-next">Partitioning</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Partitioned DB</span><span class="trigger-signal">Single node CPU saturated</span><span class="trigger-arrow">→</span><span class="trigger-next">Sharding</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Short polling</span><span class="trigger-signal">Server CPU &gt;50% from empty responses</span><span class="trigger-arrow">→</span><span class="trigger-next">Long polling / SSE</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Single WS server</span><span class="trigger-signal">Memory &gt;80%; connections &gt;50K</span><span class="trigger-arrow">→</span><span class="trigger-next">WS cluster + Redis</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Redis pub/sub</span><span class="trigger-signal">Redis CPU &gt;70%; high fan-out</span><span class="trigger-arrow">→</span><span class="trigger-next">Kafka fan-out tier</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Synchronous saga</span><span class="trigger-signal">Debug time &gt;30min for stuck workflow</span><span class="trigger-arrow">→</span><span class="trigger-next">Orchestrator</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Single region</span><span class="trigger-signal">API p99 from distant regions &gt;SLO</span><span class="trigger-arrow">→</span><span class="trigger-next">Active-passive DR</span></div>
+      <div class="trigger-row"><span class="trigger-stage">Active-passive</span><span class="trigger-signal">DR drill RTO &gt;15min; latency SLO miss</span><span class="trigger-arrow">→</span><span class="trigger-next">Active-active</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ INTERVIEWER TRAPS ══ -->
+<div class="section-label"><span class="icon">⚡</span>Common Interviewer Traps</div>
+<div class="card c5">
+  <div class="card-header" style="--card-color: var(--accent5)">
+    <div class="dot"></div><h3>What the interviewer will ask — and what the Staff answer is</h3>
+  </div>
+  <table>
+    <thead><tr><th style="width:25%">Pattern</th><th style="width:35%">The trap question</th><th>Staff-level answer</th></tr></thead>
+    <tbody>
+      <tr><td>Real-Time</td><td class="dim">What if a user has 10M followers?</td><td class="use">Hybrid fan-out: push for regular users, pull on read for celebrities</td></tr>
+      <tr><td>Contention</td><td class="dim">How do you prevent double-charge on retry?</td><td class="use">Client-generated idempotency key; optimistic lock with WHERE balance ≥ amount</td></tr>
+      <tr><td>Multi-Step</td><td class="dim">Step 4 is irreversible and fails — now what?</td><td class="use">DLQ + manual review queue; irreversible steps are placed last</td></tr>
+      <tr><td>Scale Reads</td><td class="dim">1000 requests hit DB simultaneously after cache expires</td><td class="use">Cache stampede; XFetch or mutex lock; TTL jitter prevents recurrence</td></tr>
+      <tr><td>Scale Writes</td><td class="dim">One shard gets all the traffic</td><td class="use">Hot shard; add entropy to partition key; virtual shards</td></tr>
+      <tr><td>Long Tasks</td><td class="dim">Job runs twice after worker crash</td><td class="use">Idempotent workers: check if output already exists before processing</td></tr>
+      <tr><td>Search</td><td class="dim">New products take 30 seconds to appear in search</td><td class="use">CDC → Kafka → ES indexer; tune refresh_interval; monitor consumer lag</td></tr>
+      <tr><td>Rate Limiting</td><td class="dim">Redis is down — do you fail open or closed?</td><td class="use">Auth endpoints: fail closed. API endpoints: fail open with alert. Document the choice.</td></tr>
+      <tr><td>Dist. Txn</td><td class="dim">Orchestrator crashes after debit but before credit</td><td class="use">State persisted before each step; orchestrator resumes from DB; idempotency key on credit</td></tr>
+      <tr><td>Multi-Region</td><td class="dim">User travels from India to EU — which region serves them?</td><td class="use">Redirect to home region; or cross-region proxy with documented latency cost</td></tr>
+      <tr><td>API Gateway</td><td class="dim">Auth service is down — can users still make API calls?</td><td class="use">JWKS cached at gateway (TTL 5–10min); existing valid tokens work until cache expires</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div style="text-align:center; padding: 24px 0 8px; font-size:10.5px; color:var(--muted); font-family:var(--mono)">
+  Staff Engineer System Design — Handbook + Patterns Playbook · All reference material compiled
+</div>
+
+</body>
+</html>
