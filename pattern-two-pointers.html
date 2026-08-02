@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DSA Pattern Notes • Two Pointers</title>
+<style>
+  :root{
+    --paper:#fffdf8; --line:#dfe3ea; --ink:#1f2430;
+    --purple:#6c4fd6; --purple-bg:#f2edfd;
+    --blue:#2b6cb0; --blue-bg:#eaf2fb;
+    --red:#d9435e; --red-bg:#fdeced;
+    --green:#1f8a5f; --green-bg:#e9f7f0;
+    --yellow-bg:#fff6d8; --yellow-border:#e8c547;
+    --orange:#e2762e;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --hand: 'Segoe Print', 'Comic Sans MS', 'Bradley Hand', cursive;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#d9dde3; font-family:var(--body); color:var(--ink); padding:32px 0; font-weight:500; }
+  .page{ width:820px; max-width:92vw; margin:0 auto 28px auto; background:repeating-linear-gradient(var(--paper) 0px, var(--paper) 31px, #eef1f6 32px); border:1px solid #c7cdd6; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:26px 32px 22px 32px; position:relative; }
+  .page-header{ display:flex; justify-content:flex-start; align-items:center; border-bottom:3px solid var(--ink); padding-bottom:8px; margin-bottom:16px; }
+  .brand{ display:flex; align-items:center; gap:8px; font-family:var(--hand); font-weight:700; font-size:20px; }
+  .brand .badge{ background:var(--purple); color:#fff; width:26px;height:26px;border-radius:7px; display:flex;align-items:center;justify-content:center; font-family:var(--body); font-size:13px; }
+  .section-label{ font-size:12px; letter-spacing:0.03em; color:#5a6172; font-weight:600; }
+  .page-footer{ text-align:right; font-size:11px; color:#8a90a0; margin-top:18px; border-top:1px solid var(--line); padding-top:6px; }
+  h1.big-title{ font-family:var(--hand); font-size:42px; text-align:center; margin:6px 0 4px 0; letter-spacing:0.02em; }
+  .subtitle{ text-align:center; font-size:15px; color:#4a5062; margin-bottom:18px; }
+  h2.topic-title{ font-family:var(--hand); font-size:24px; margin:0 0 14px 0; display:flex; align-items:center; gap:10px; }
+  h2.topic-title .num{ color:var(--purple); }
+  p{ font-size:13.5px; line-height:1.55; margin:0 0 10px 0; font-weight:500; }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px; }
+  .box{ border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:13px; line-height:1.5; }
+  .box h4{ margin:0 0 6px 0; font-size:12.5px; text-transform:uppercase; letter-spacing:0.03em; display:flex;align-items:center;gap:6px; }
+  .concept{ border:2px solid var(--blue); background:var(--blue-bg); } .concept h4{ color:var(--blue); }
+  .trap{ border:2px solid var(--red); background:var(--red-bg); } .trap h4{ color:var(--red); }
+  .pattern{ border:2px solid var(--purple); background:var(--purple-bg); } .pattern h4{ color:var(--purple); }
+  .complexity{ border:2px solid var(--green); background:var(--green-bg); } .complexity h4{ color:var(--green); }
+  .remember{ border:2px dashed var(--yellow-border); background:var(--yellow-bg); font-family:var(--hand); font-size:15px; text-align:center; padding:10px 14px; }
+  code, .code{ font-family:var(--mono); background:#f0f1f4; padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  pre{ font-family:var(--mono); background:#282c34; color:#e6e6e6; padding:12px 14px; border-radius:8px; font-size:12px; overflow-x:auto; line-height:1.5; margin:0 0 14px 0; }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0 14px 0; }
+  th{ background:var(--ink); color:#fff; text-align:left; padding:6px 8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.02em; }
+  td{ padding:6px 8px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12px; font-weight:600; }
+  tr:nth-child(even) td{ background:#f7f8fa; }
+  .ok{ color:var(--green); font-weight:700; } .bad{ color:var(--red); font-weight:700; }
+  ul{ margin:4px 0 10px 18px; padding:0; font-size:13px; line-height:1.5; font-weight:500; }
+  .arr{ display:flex; gap:2px; margin:10px 0; font-family:var(--mono); flex-wrap:wrap; }
+  .cell{ display:flex; flex-direction:column; align-items:center; }
+  .cell .val{ width:38px;height:38px; border:2px solid var(--ink); display:flex;align-items:center;justify-content:center; font-size:15px; font-weight:700; background:#fff; }
+  .cell .idx{ font-size:11px; color:#4a5062; margin-top:3px; font-weight:700; }
+  .cell.hl .val{ background:var(--yellow-bg); border-color:var(--orange); }
+  .cell.hl2 .val{ background:var(--purple-bg); border-color:var(--purple); }
+</style>
+</head>
+<body>
+
+<div class="page" style="min-height:480px; display:flex; flex-direction:column; justify-content:center;">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes</div></div>
+  <h1 class="big-title">≥ TWO POINTERS ≤</h1>
+  <div class="subtitle">Pattern reference — sorted order tells you which side to move</div>
+  <div class="arr" style="justify-content:center;">
+    <div class="cell hl"><div class="val">2</div><div class="idx">L</div></div>
+    <div class="cell"><div class="val">7</div><div class="idx"></div></div>
+    <div class="cell"><div class="val">11</div><div class="idx"></div></div>
+    <div class="cell hl2"><div class="val">15</div><div class="idx">R</div></div>
+  </div>
+  <div class="remember" style="max-width:460px;margin:16px auto 0 auto;">💡 Sorted array + "pair/triplet meeting a condition" + "O(1) space" is almost always Two Pointers.</div>
+  <div class="page-footer">Page 1/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">01.</span> The Core Idea — Two Flavors</h2>
+  <div class="cols">
+    <div class="box concept"><h4>Flavor 1 — Opposite ends, moving inward</h4>Used for: palindrome check, two sum (sorted), container with most water, trapping rain water. Left starts at 0, right at n-1, they move toward each other.</div>
+    <div class="box concept"><h4>Flavor 2 — Same direction, different speeds</h4>Used for: remove duplicates in place, fast/slow pointer problems, partitioning. Both pointers start together and move rightward, but one advances more often/faster than the other.</div>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Opposite-end two pointers requires <b>sorted</b> input (or a monotonic structure) — without it, you don't know which pointer "should" move. Same-direction two pointers doesn't need sorted input; it's about read/write speed, not value comparison.</div>
+  <div class="remember">💡 Ask yourself first: are my two pointers walking toward each other, or in the same direction at different speeds? That answers which flavor you need.</div>
+  <div class="page-footer">Page 2/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">02.</span> Valid Palindrome (with cleanup)</h2>
+  <p>s = "A man, a plan, a canal: Panama" → ignore case and non-alphanumeric characters, then compare from both ends.</p>
+  <pre>int left = 0, right = s.length() - 1;
+while (left &lt; right) {
+    while (left &lt; right && !Character.isLetterOrDigit(s.charAt(left)))  left++;
+    while (left &lt; right && !Character.isLetterOrDigit(s.charAt(right))) right--;
+    if (Character.toLowerCase(s.charAt(left)) != Character.toLowerCase(s.charAt(right)))
+        return false;
+    left++; right--;
+}
+return true;</pre>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Skip-while-invalid loops need their own <code>left &lt; right</code> bound check, or they can run past the other pointer entirely on strings with lots of punctuation.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Palindrome with noise to ignore" → same opposite-end two pointers as the clean version, just with inline filtering before each comparison.</div>
+  <div class="remember">💡 Cleanup and comparison happen inline, in the same pass — no need for a separate filtering pass first.</div>
+  <div class="page-footer">Page 3/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">03.</span> 3Sum</h2>
+  <p>nums=[-1,0,1,2,-1,-4] → find all unique triplets summing to 0. Sort first, then fix one element and two-pointer the rest.</p>
+  <table>
+    <tr><th>Sorted</th><td colspan="5">[-4, -1, -1, 0, 1, 2]</td></tr>
+    <tr><th>Fixed i</th><th>Left</th><th>Right</th><th>Sum</th><th>Action</th></tr>
+    <tr><td>-4 (i=0)</td><td>-1</td><td>2</td><td>-3</td><td>too small → left++</td></tr>
+    <tr><td>-4 (i=0)</td><td>-1</td><td>2</td><td>-3</td><td>...no triplet found for -4</td></tr>
+    <tr><td>-1 (i=1)</td><td>0</td><td>2</td><td>1</td><td>too big → right--</td></tr>
+    <tr><td>-1 (i=1)</td><td>0</td><td>1</td><td class="ok">0</td><td>✅ found [-1,0,1], move both, skip dupes</td></tr>
+  </table>
+  <pre>Arrays.sort(nums);
+for (int i = 0; i &lt; nums.length - 2; i++) {
+    if (i &gt; 0 &amp;&amp; nums[i] == nums[i-1]) continue; // skip duplicate "fixed" values
+    int left = i + 1, right = nums.length - 1;
+    while (left &lt; right) {
+        int sum = nums[i] + nums[left] + nums[right];
+        if (sum == 0) {
+            result.add(List.of(nums[i], nums[left], nums[right]));
+            while (left &lt; right &amp;&amp; nums[left] == nums[left+1]) left++;  // skip dupes
+            while (left &lt; right &amp;&amp; nums[right] == nums[right-1]) right--;
+            left++; right--;
+        } else if (sum &lt; 0) left++;
+        else right--;
+    }
+}</pre>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Duplicate skipping is required at THREE points: the fixed outer element, and both inner pointers after a match — miss any one and you get duplicate triplets in the output.</div>
+  <div class="box complexity"><h4>Complexity</h4>O(n²) — O(n log n) sort + O(n) outer loop × O(n) inner two-pointer scan.</div>
+  <div class="remember">💡 3Sum = "fix one element, reduce to 2Sum on the rest" — this fix-and-reduce trick generalizes to 4Sum and beyond.</div>
+  <div class="page-footer">Page 4/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">04.</span> Container With Most Water</h2>
+  <p>heights=[1,8,6,2,5,4,8,3,7] → maximize area between two lines. Start with the widest container (both pointers at the ends), and always move the SHORTER side inward — moving the taller side can only shrink width without any chance of increasing height.</p>
+  <table>
+    <tr><th>Left</th><th>Right</th><th>Width</th><th>Height=min(L,R)</th><th>Area</th><th>Move</th></tr>
+    <tr><td>1 (idx0)</td><td>7 (idx8)</td><td>8</td><td>1</td><td>8</td><td>move left (shorter)</td></tr>
+    <tr><td>8 (idx1)</td><td>7 (idx8)</td><td>7</td><td>7</td><td class="ok">49</td><td>move right (shorter)</td></tr>
+  </table>
+  <pre>int left = 0, right = heights.length - 1, maxArea = 0;
+while (left &lt; right) {
+    int area = Math.min(heights[left], heights[right]) * (right - left);
+    maxArea = Math.max(maxArea, area);
+    if (heights[left] &lt; heights[right]) left++;
+    else right--;
+}</pre>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Why moving the shorter side is provably correct, not just a heuristic: the area is bounded by the SHORTER wall. Moving the taller wall inward keeps that same shorter-wall bound (or makes it worse) while definitely shrinking width — so it can never help. Moving the shorter wall is the only move that has any chance of increasing the bounding height.</div>
+  <div class="box complexity"><h4>Complexity</h4>O(n) — beats the O(n²) brute-force check of every pair.</div>
+  <div class="remember">💡 Always move the pointer at the shorter wall — that's the one and only insight this problem is testing.</div>
+  <div class="page-footer">Page 5/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">05.</span> Trapping Rain Water (two-pointer version)</h2>
+  <p>height=[0,1,0,2,1,0,1,3,2,1,2,1] → water at index i = min(maxLeft, maxRight) − height[i]. Two pointers avoid precomputing full maxLeft[]/maxRight[] arrays.</p>
+  <pre>int left = 0, right = n - 1, leftMax = 0, rightMax = 0, water = 0;
+while (left &lt; right) {
+    if (height[left] &lt; height[right]) {
+        leftMax = Math.max(leftMax, height[left]);
+        water += leftMax - height[left];
+        left++;
+    } else {
+        rightMax = Math.max(rightMax, height[right]);
+        water += rightMax - height[right];
+        right++;
+        right--; // (advance right pointer inward)
+    }
+}</pre>
+  <div class="box concept">
+    <h4>Why comparing height[left] vs height[right] is safe</h4>
+    Whichever side is shorter, THAT side's water level is bounded by its own running max — because there's guaranteed to be a taller wall somewhere on the other side (that's exactly why we chose to process the shorter side). So you never need the other side's exact max, only that it's ≥ your current side.
+  </div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Same "process the shorter/weaker side" insight as Container With Most Water — a recurring theme across two-pointer problems where one side bounds the answer.</div>
+  <div class="remember">💡 Same family as Container With Most Water: process the side that's currently the bottleneck, because the other side is guaranteed not to be.</div>
+  <div class="page-footer">Page 6/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">06.</span> Same-Direction — Remove Duplicates In Place</h2>
+  <p>nums=[1,1,2,2,3] (sorted) → remove duplicates in place, return new length. "Slow" pointer marks where the next unique value should be written; "fast" pointer scans ahead looking for it.</p>
+  <table>
+    <tr><th>slow</th><th>fast</th><th>Compare</th><th>Action</th><th>Array state</th></tr>
+    <tr><td>0</td><td>1</td><td>nums[1]==nums[0]</td><td>skip (duplicate)</td><td>[1,1,2,2,3]</td></tr>
+    <tr><td>0</td><td>2</td><td>nums[2]!=nums[0]</td><td>slow++, nums[slow]=nums[2]</td><td>[1,2,2,2,3]</td></tr>
+    <tr><td>1</td><td>3</td><td>nums[3]==nums[1]</td><td>skip (duplicate)</td><td>[1,2,2,2,3]</td></tr>
+    <tr><td>1</td><td>4</td><td>nums[4]!=nums[1]</td><td>slow++, nums[slow]=nums[4]</td><td class="ok">[1,2,3,2,3] → length=3</td></tr>
+  </table>
+  <pre>int slow = 0;
+for (int fast = 1; fast &lt; nums.length; fast++) {
+    if (nums[fast] != nums[slow]) {
+        slow++;
+        nums[slow] = nums[fast];
+    }
+}
+return slow + 1; // new length</pre>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Modify array in place, O(1) space, based on a scan condition" → same-direction slow/fast pointer, read pointer scans ahead of write pointer.</div>
+  <div class="remember">💡 Same-direction two pointers: fast reads everything, slow only writes what deserves to stay.</div>
+  <div class="page-footer">Page 7/8</div>
+</div>
+
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Pattern Notes • Two Pointers</div></div>
+  <h2 class="topic-title"><span class="num">07.</span> Mistakes to Avoid & Recap</h2>
+  <div class="box trap">
+    <h4>⚠ Common Mistakes</h4>
+    <ul>
+      <li>Applying opposite-end two pointers to unsorted data without sorting first</li>
+      <li>Moving the taller/larger side in Container/Rain Water problems instead of the shorter/bounded side</li>
+      <li>Missing duplicate-skip logic in 3Sum/4Sum, producing duplicate results</li>
+      <li>Confusing same-direction (read/write speed) with opposite-end (value comparison) — different bugs come from each</li>
+    </ul>
+  </div>
+  <div class="box pattern"><h4>Toolbox recap</h4>Opposite-end (palindrome, sorted 2Sum/3Sum, container, rain water) · Same-direction (remove duplicates, partitioning) · Fix-and-reduce (3Sum → 2Sum, generalizes to K-Sum)</div>
+  <div class="remember">💡 Two pointers work because there's always a reason ONE specific pointer should move — find that reason and the algorithm writes itself.</div>
+  <div class="page-footer">Page 8/8</div>
+</div>
+
+</body>
+</html>

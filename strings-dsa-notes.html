@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DSA Interview Notes • Strings</title>
+<style>
+  :root{
+    --paper:#fffdf8;
+    --line:#dfe3ea;
+    --ink:#1f2430;
+    --purple:#6c4fd6;
+    --purple-bg:#f2edfd;
+    --blue:#2b6cb0;
+    --blue-bg:#eaf2fb;
+    --red:#d9435e;
+    --red-bg:#fdeced;
+    --green:#1f8a5f;
+    --green-bg:#e9f7f0;
+    --yellow-bg:#fff6d8;
+    --yellow-border:#e8c547;
+    --orange:#e2762e;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --hand: 'Segoe Print', 'Comic Sans MS', 'Bradley Hand', cursive;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#d9dde3;
+    font-family:var(--body);
+    color:var(--ink);
+    padding:32px 0;
+    font-weight:500;
+  }
+  .page{
+    width:820px;
+    max-width:92vw;
+    margin:0 auto 28px auto;
+    background:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 31px, #eef1f6 32px);
+    border:1px solid #c7cdd6;
+    border-radius:6px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.12);
+    padding:26px 32px 22px 32px;
+    position:relative;
+  }
+  .page-header{
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+    border-bottom:3px solid var(--ink);
+    padding-bottom:8px;
+    margin-bottom:16px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-family:var(--hand);
+    font-weight:700;
+    font-size:20px;
+  }
+  .brand .badge{
+    background:var(--purple);
+    color:#fff;
+    width:26px;height:26px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--body);
+    font-size:13px;
+  }
+  .section-label{
+    font-size:12px;
+    letter-spacing:0.03em;
+    color:#5a6172;
+    font-weight:600;
+  }
+  .page-footer{
+    text-align:right;
+    font-size:11px;
+    color:#8a90a0;
+    margin-top:18px;
+    border-top:1px solid var(--line);
+    padding-top:6px;
+  }
+  h1.big-title{
+    font-family:var(--hand);
+    font-size:46px;
+    text-align:center;
+    margin:6px 0 4px 0;
+    letter-spacing:0.02em;
+  }
+  .subtitle{
+    text-align:center;
+    font-size:15px;
+    color:#4a5062;
+    margin-bottom:18px;
+  }
+  h2.topic-title{
+    font-family:var(--hand);
+    font-size:26px;
+    margin:0 0 14px 0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  h2.topic-title .num{
+    color:var(--purple);
+  }
+  h3.mini-head{
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:#5a6172;
+    margin:0 0 8px 0;
+    font-weight:700;
+  }
+  p{ font-size:13.5px; line-height:1.55; margin:0 0 10px 0; font-weight:500; }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px; }
+  .box{
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:14px;
+    font-size:13px;
+    line-height:1.5;
+  }
+  .box h4{
+    margin:0 0 6px 0;
+    font-size:12.5px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    display:flex;align-items:center;gap:6px;
+  }
+  .concept{ border:2px solid var(--blue); background:var(--blue-bg); }
+  .concept h4{ color:var(--blue); }
+  .trap{ border:2px solid var(--red); background:var(--red-bg); }
+  .trap h4{ color:var(--red); }
+  .pattern{ border:2px solid var(--purple); background:var(--purple-bg); }
+  .pattern h4{ color:var(--purple); }
+  .complexity{ border:2px solid var(--green); background:var(--green-bg); }
+  .complexity h4{ color:var(--green); }
+  .remember{
+    border:2px dashed var(--yellow-border);
+    background:var(--yellow-bg);
+    font-family:var(--hand);
+    font-size:15px;
+    text-align:center;
+    padding:10px 14px;
+  }
+  code, .code{
+    font-family:var(--mono);
+    background:#f0f1f4;
+    padding:1px 5px;
+    border-radius:4px;
+    font-size:12.5px;
+  }
+  pre{
+    font-family:var(--mono);
+    background:#282c34;
+    color:#e6e6e6;
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:12px;
+    overflow-x:auto;
+    line-height:1.5;
+    margin:0 0 14px 0;
+  }
+  /* index/array diagram */
+  .arr{ display:flex; gap:2px; margin:10px 0; font-family:var(--mono); }
+  .cell{
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .cell .val{
+    width:38px;height:38px;
+    border:2px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:15px; font-weight:700; background:#fff;
+  }
+  .cell .idx{ font-size:11px; color:#4a5062; margin-top:3px; font-weight:700; }
+  .cell.hl .val{ background:var(--yellow-bg); border-color:var(--orange); }
+  .cell.hl2 .val{ background:var(--purple-bg); border-color:var(--purple); }
+  .cell.match .val{ background:var(--green-bg); border-color:var(--green); }
+  .arrow-row{ display:flex; gap:2px; font-size:12px; color:var(--red); font-family:var(--mono); }
+  .arrow-row .a{ width:40px; text-align:center; }
+  /* worked example table */
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0 14px 0; }
+  th{
+    background:var(--ink); color:#fff; text-align:left;
+    padding:6px 8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.02em;
+  }
+  td{ padding:6px 8px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12px; font-weight:600; }
+  tr:nth-child(even) td{ background:#f7f8fa; }
+  .ok{ color:var(--green); font-weight:700; }
+  .bad{ color:var(--red); font-weight:700; }
+  ul{ margin:4px 0 10px 18px; padding:0; font-size:13px; line-height:1.5; font-weight:500; }
+  .lightbulb{ font-size:16px; }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="page" style="min-height:560px; display:flex; flex-direction:column; justify-content:center;">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h1 class="big-title">≥ STRINGS ≤</h1>
+  <div class="subtitle">Complete visual reference — from fundamentals to advanced interview patterns</div>
+  <div class="arr" style="justify-content:center; margin:24px 0;">
+    <div class="cell"><div class="val">H</div><div class="idx">0</div></div>
+    <div class="cell"><div class="val">E</div><div class="idx">1</div></div>
+    <div class="cell"><div class="val">L</div><div class="idx">2</div></div>
+    <div class="cell"><div class="val">L</div><div class="idx">3</div></div>
+    <div class="cell"><div class="val">O</div><div class="idx">4</div></div>
+  </div>
+  <div class="pattern" style="max-width:420px;margin:0 auto;text-align:center;">
+    <div style="font-family:var(--hand);font-size:16px;">From Basics → Interview Patterns</div>
+  </div>
+  <div class="remember" style="max-width:420px;margin:24px auto 0 auto;">💡 Retrieval, not re-reading — quiz yourself on each page before flipping.</div>
+  <div class="page-footer">Page 1/11</div>
+</div>
+
+<!-- PAGE 2: STRINGS START HERE -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">01.</span> Strings — Start Here</h2>
+  <p>A string is just a sequence of characters, indexed from 0. Everything else in this deck builds on that one idea: knowing where a character sits, and how many sit between two points.</p>
+  <div class="arr">
+    <div class="cell"><div class="val">H</div><div class="idx">0</div></div>
+    <div class="cell"><div class="val">E</div><div class="idx">1</div></div>
+    <div class="cell"><div class="val">L</div><div class="idx">2</div></div>
+    <div class="cell"><div class="val">L</div><div class="idx">3</div></div>
+    <div class="cell"><div class="val">O</div><div class="idx">4</div></div>
+  </div>
+  <div class="cols">
+    <div class="box concept">
+      <h4>Key Terms</h4>
+      <ul>
+        <li><b>Character</b> — smallest unit ('H', '7', '@')</li>
+        <li><b>Index</b> — position of a character</li>
+        <li><b>Length</b> — total character count</li>
+        <li><b>Empty string</b> — <code>""</code>, length 0</li>
+        <li><b>Concatenation</b> — joining two strings: <code>"Hello"+"World"="HelloWorld"</code></li>
+      </ul>
+    </div>
+    <div class="box concept">
+      <h4>Quick Access Patterns</h4>
+      <ul>
+        <li>First char → <code>s[0]</code> → 'H'</li>
+        <li>Last char → <code>s[length-1]</code> → 'O'</li>
+        <li>Substring idx 1→3 → <code>s.substring(1,4)</code> → "ELL"</li>
+        <li>In Java, <code>String</code> is <b>immutable</b> — every "modification" creates a new object</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box trap">
+    <h4>⚠ Interview Trap</h4>
+    In Java, repeated <code>+</code> concatenation inside a loop is O(n²) overall because each concat allocates a new String. Use <code>StringBuilder</code> for loop-based building — this is a very common senior-level red flag if missed.
+  </div>
+  <div class="remember">💡 Always clarify character set, case sensitivity, and valid inputs before solving — most bugs come from unstated assumptions, not logic errors.</div>
+  <div class="page-footer">Page 2/11</div>
+</div>
+
+<!-- PAGE 3: SUBSTRING VS SUBSEQUENCE -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">02.</span> Know These Terms</h2>
+  <p>Let <code>S = "ABCDE"</code>. These four words get used loosely in conversation but mean precise, different things in an interview.</p>
+  <div class="cols">
+    <div class="box concept">
+      <h4>Substring — contiguous</h4>
+      Characters must be back-to-back.
+      <div class="arr">
+        <div class="cell"><div class="val">A</div><div class="idx">0</div></div>
+        <div class="cell hl"><div class="val">B</div><div class="idx">1</div></div>
+        <div class="cell hl"><div class="val">C</div><div class="idx">2</div></div>
+        <div class="cell hl"><div class="val">D</div><div class="idx">3</div></div>
+        <div class="cell"><div class="val">E</div><div class="idx">4</div></div>
+      </div>
+      "BCD" = substring (index 1→3) ✅
+    </div>
+    <div class="box concept">
+      <h4>Subsequence — ordered, not contiguous</h4>
+      Order preserved, gaps allowed.
+      <div class="arr">
+        <div class="cell hl2"><div class="val">A</div><div class="idx">0</div></div>
+        <div class="cell"><div class="val">B</div><div class="idx">1</div></div>
+        <div class="cell hl2"><div class="val">C</div><div class="idx">2</div></div>
+        <div class="cell"><div class="val">D</div><div class="idx">3</div></div>
+        <div class="cell hl2"><div class="val">E</div><div class="idx">4</div></div>
+      </div>
+      "ACE" = subsequence (indices 0,2,4) ✅
+    </div>
+  </div>
+  <div class="cols">
+    <div class="box concept"><h4>Prefix</h4>Substring starting from index 0.<br>"ABC" is a prefix of "ABCDE"</div>
+    <div class="box concept"><h4>Suffix</h4>Substring ending at the last index.<br>"DE" is a suffix of "ABCDE"</div>
+  </div>
+  <div class="box trap">
+    <h4>⚠ Interview Trap</h4>
+    Substring ≠ Subsequence. Every substring is a subsequence, but <b>not every subsequence is a substring</b>. Interviewers phrase questions loosely ("find the longest common string") — always confirm which one they mean before coding.
+  </div>
+  <div class="remember">💡 Substring = continuous block. Subsequence = order kept, gaps allowed. Prefix = from start, Suffix = to end.</div>
+  <div class="page-footer">Page 3/11</div>
+</div>
+
+<!-- PAGE 4: STRING OPERATIONS -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">03.</span> String Operations & Complexity</h2>
+  <table>
+    <tr><th>Operation</th><th>Typical Complexity</th><th>Note</th></tr>
+    <tr><td>Access s[i]</td><td>O(1)*</td><td>*O(1) only if indexable representation</td></tr>
+    <tr><td>Traverse all chars</td><td>O(n)</td><td>—</td></tr>
+    <tr><td>Compare two strings</td><td>O(n) worst case</td><td>Short-circuits on first mismatch</td></tr>
+    <tr><td>Search a character</td><td>O(n)</td><td>Linear scan</td></tr>
+    <tr><td>Reverse a string</td><td>O(n)</td><td>Two-pointer swap</td></tr>
+    <tr><td>Substring s[l..r]</td><td>Implementation-dependent</td><td>Java: O(n) (copies chars, post-JDK7)</td></tr>
+    <tr><td>Concatenate s1+s2</td><td>Implementation-dependent</td><td>Avoid in loops — use StringBuilder</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>Visualizing a left-to-right traversal</h4>
+    <div class="arr">
+      <div class="cell hl"><div class="val">H</div><div class="idx">0</div></div>
+      <div class="cell"><div class="val">E</div><div class="idx">1</div></div>
+      <div class="cell"><div class="val">L</div><div class="idx">2</div></div>
+      <div class="cell"><div class="val">L</div><div class="idx">3</div></div>
+      <div class="cell"><div class="val">O</div><div class="idx">4</div></div>
+    </div>
+    <span style="font-size:12px;color:#6a7180;">→ pointer sweeps left to right, O(n) total</span>
+  </div>
+  <div class="box trap">
+    <h4>⚠ Interview Rule</h4>
+    Always analyze what's happening <b>inside loops</b>. A seemingly O(n) traversal that calls <code>substring()</code> or string comparison inside the loop body silently becomes O(n²) overall.
+  </div>
+  <div class="remember">💡 String operation cost differs across languages/runtimes — state your assumption before quoting Big-O.</div>
+  <div class="page-footer">Page 4/11</div>
+</div>
+
+<!-- PAGE 5: FREQUENCY COUNTING -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">04.</span> Frequency Counting / Hashing</h2>
+  <p>Many string problems reduce to "how many times does each character appear." Example: <code>S = "BANANA"</code></p>
+  <div class="cols">
+    <div class="box concept">
+      <h4>1. Frequency Array</h4>
+      Best when the character set is small & known (e.g. lowercase a-z).
+      <pre>int[] freq = new int[26];
+for (char c : s.toCharArray())
+    freq[c - 'a']++;</pre>
+      Good for: fixed ASCII ranges, tight memory.
+    </div>
+    <div class="box concept">
+      <h4>2. HashMap</h4>
+      Best when the character set is large/unknown (Unicode, case-sensitive, mixed symbols).
+      <pre>Map&lt;Character,Integer&gt; freq = new HashMap&lt;&gt;();
+for (char c : s.toCharArray())
+    freq.merge(c, 1, Integer::sum);</pre>
+    </div>
+  </div>
+  <table>
+    <tr><th>Char</th><th>Count</th></tr>
+    <tr><td>B</td><td>1</td></tr>
+    <tr><td>A</td><td>3</td></tr>
+    <tr><td>N</td><td>2</td></tr>
+  </table>
+  <div class="box pattern">
+    <h4>Pattern Recognition</h4>
+    If the problem asks for: <b>anagram check · isomorphic strings · duplicate characters · first non-repeating char · k most frequent chars · occurrence analysis</b> → think <b>Frequency Counting</b>.
+  </div>
+  <div class="box complexity"><h4>Complexity</h4>Time: O(n) — one pass. Space: O(k), k = distinct characters.</div>
+  <div class="remember">💡 Small fixed alphabet → array. Anything else → HashMap.</div>
+  <div class="page-footer">Page 5/11</div>
+</div>
+
+<!-- PAGE 6: TWO POINTERS -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">05.</span> Two Pointers — Palindrome Check</h2>
+  <p>Two pointers start at opposite ends and move inward, comparing as they go. <code>S = "RACECAR"</code></p>
+  <table>
+    <tr><th>Step</th><th>Left / Right</th><th>Compare</th><th>Result</th></tr>
+    <tr><td>1</td><td>L=0 (R) / R=6 (R)</td><td>S[0]=='R', S[6]=='R'</td><td class="ok">match → move inward</td></tr>
+    <tr><td>2</td><td>L=1 (A) / R=5 (A)</td><td>S[1]=='A', S[5]=='A'</td><td class="ok">match → move inward</td></tr>
+    <tr><td>3</td><td>L=2 (C) / R=4 (C)</td><td>S[2]=='C', S[4]=='C'</td><td class="ok">match → move inward</td></tr>
+    <tr><td>4</td><td>L=3 (E) / R=3 (E)</td><td>pointers meet</td><td class="ok">✅ Palindrome</td></tr>
+  </table>
+  <pre>int left = 0, right = n - 1;
+while (left &lt; right) {
+    if (s.charAt(left) != s.charAt(right)) return false;
+    left++; right--;
+}
+return true;</pre>
+  <div class="box trap">
+    <h4>⚠ Interview Tip — Don't Forget</h4>
+    <ul>
+      <li>Empty string / single character → always a palindrome</li>
+      <li>Case sensitivity — define it explicitly with the interviewer</li>
+      <li>"Ignore non-alphanumeric" variant (e.g. "A man, a plan, a canal: Panama") needs a cleanup pass first</li>
+    </ul>
+  </div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Comparing characters from <b>both ends toward the middle</b> → think <b>Two Pointers</b>.</div>
+  <div class="box complexity"><h4>Complexity</h4>Time: O(n). Space: O(1) — no extra structure needed.</div>
+  <div class="remember">💡 Two pointers turn an O(n) space palindrome check into O(1) space — always the follow-up interviewers push for.</div>
+  <div class="page-footer">Page 6/11</div>
+</div>
+
+<!-- PAGE 7: SLIDING WINDOW -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">06.</span> Sliding Window</h2>
+  <p><b>Problem:</b> Longest substring without repeating characters. <code>S = "ABCABCBB"</code></p>
+  <table>
+    <tr><th>Action</th><th>L</th><th>R</th><th>Window</th><th>Set</th><th>Result</th></tr>
+    <tr><td>expand R</td><td>0</td><td>0</td><td>[A]</td><td>{A}</td><td class="ok">valid, len=1</td></tr>
+    <tr><td>expand R</td><td>0</td><td>1</td><td>[A,B]</td><td>{A,B}</td><td class="ok">valid, len=2</td></tr>
+    <tr><td>expand R</td><td>0</td><td>2</td><td>[A,B,C]</td><td>{A,B,C}</td><td class="ok">valid, len=3</td></tr>
+    <tr><td>expand R</td><td>0</td><td>3</td><td>[A,B,C,A]</td><td>{A,B,C,A}</td><td class="bad">duplicate A</td></tr>
+    <tr><td>shrink L</td><td>1</td><td>3</td><td>[B,C,A]</td><td>{B,C,A}</td><td class="ok">valid, len=3</td></tr>
+    <tr><td>expand R</td><td>1</td><td>4</td><td>[B,C,A,B]</td><td>—</td><td class="bad">duplicate B</td></tr>
+    <tr><td>shrink L</td><td>2</td><td>4</td><td>[C,A,B]</td><td>{C,A,B}</td><td class="ok">valid, len=3</td></tr>
+  </table>
+  <pre>int left = 0, maxLen = 0;
+Set&lt;Character&gt; window = new HashSet&lt;&gt;();
+for (int right = 0; right &lt; s.length(); right++) {
+    while (window.contains(s.charAt(right))) {
+        window.remove(s.charAt(left));
+        left++;
+    }
+    window.add(s.charAt(right));
+    maxLen = Math.max(maxLen, right - left + 1);
+}</pre>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Longest/shortest <b>contiguous</b> substring with a condition" → think <b>Sliding Window</b>.</div>
+  <div class="box complexity"><h4>Complexity</h4>Time: O(n) — each char enters/leaves window once. Space: O(k), k = unique chars in window.</div>
+  <div class="remember">💡 Expand right greedily, shrink left only when the window breaks the rule — never restart from scratch.</div>
+  <div class="page-footer">Page 7/11</div>
+</div>
+
+<!-- PAGE 8: KMP -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">07.</span> String Matching — KMP</h2>
+  <p>Naive matching re-checks characters after every mismatch. KMP avoids that using an <b>LPS array</b> (Longest Prefix that is also a Suffix) to skip ahead in the pattern intelligently.</p>
+  <div class="box concept">
+    <h4>LPS array — Pattern = "ABABACABA"</h4>
+    <table>
+      <tr><th>i</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+      <tr><th>P[i]</th><td>A</td><td>B</td><td>A</td><td>B</td><td>A</td><td>C</td><td>A</td><td>B</td><td>A</td></tr>
+      <tr><th>LPS[i]</th><td>0</td><td>0</td><td>1</td><td>2</td><td>3</td><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+    </table>
+    Build rule: compare P[i] with P[len]. Match → len++, LPS[i]=len. Mismatch & len>0 → len=LPS[len-1] (backtrack, don't advance i). Mismatch & len==0 → LPS[i]=0.
+  </div>
+  <div class="box concept">
+    <h4>Search walkthrough — Text "ABABCABAB", Pattern "ABAB"</h4>
+    <table>
+      <tr><th>Step</th><th>i(text)</th><th>j(pattern)</th><th>Compare</th><th>Action</th></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>A==A</td><td>match, i++,j++</td></tr>
+      <tr><td>2</td><td>1</td><td>1</td><td>B==B</td><td>match, i++,j++</td></tr>
+      <tr><td>3</td><td>2</td><td>2</td><td>A==A</td><td>match, i++,j++</td></tr>
+      <tr><td>4</td><td>3</td><td>3</td><td>B==B</td><td>match, i++,j++</td></tr>
+      <tr><td>5</td><td>4</td><td>4</td><td>j==m</td><td class="ok">found at index 0</td></tr>
+    </table>
+  </div>
+  <div class="cols">
+    <div class="box complexity"><h4>Complexity</h4>Preprocess O(m), search O(n), total O(n+m). Beats naive O(n·m).</div>
+    <div class="box trap"><h4>⚠ Interview Trap</h4>People forget the LPS build uses P[i] vs P[len], <i>not</i> P[i] vs P[i-1]. That off-by-one is the #1 KMP bug.</div>
+  </div>
+  <div class="remember">💡 KMP shines when the same pattern is searched many times in a large text — the LPS array is what lets it never re-scan.</div>
+  <div class="page-footer">Page 8/11</div>
+</div>
+
+<!-- PAGE 9: RABIN-KARP -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">08.</span> Rabin-Karp — Rolling Hash</h2>
+  <p>Instead of comparing characters one by one, compute a hash for each window and compare hashes. A <b>rolling hash</b> updates the hash for the next window in O(1) instead of recomputing from scratch.</p>
+  <div class="box concept">
+    <h4>Rolling hash formula</h4>
+    <code>H(i+1) = ((H(i) − T[i]×h) × d + T[i+m]) mod q</code><br><br>
+    d = base (e.g. 256 for ASCII), q = large prime modulus, h = d^(m-1) mod q (used to remove the leading char's contribution).
+  </div>
+  <div class="box concept">
+    <h4>Why the modulus q?</h4>
+    <ul><li>Prevents integer overflow on large texts</li><li>Reduces hash collisions</li><li>Keeps hash values in a bounded range [0, q-1]</li></ul>
+  </div>
+  <table>
+    <tr><th>Window</th><th>Substring</th><th>Hash</th><th>Match text?</th><th>Action</th></tr>
+    <tr><td>0-3</td><td>ABAB</td><td>89</td><td class="ok">Yes</td><td>verify chars → match at 0</td></tr>
+    <tr><td>1-4</td><td>BABA</td><td>35</td><td class="bad">No</td><td>slide window</td></tr>
+    <tr><td>2-5</td><td>ABAB</td><td>89</td><td class="ok">Yes</td><td>verify chars → match at 2</td></tr>
+    <tr><td>3-6</td><td>BABA</td><td>35</td><td class="bad">No</td><td>slide window</td></tr>
+  </table>
+  <div class="cols">
+    <div class="box complexity"><h4>Complexity</h4>Best/avg: O(n+m). Worst (many collisions): O(n·m) — always verify on hash match!</div>
+    <div class="box pattern"><h4>Real-world use</h4>Plagiarism detection · DNA sequence matching · file/virus signature scanning · network intrusion detection.</div>
+  </div>
+  <div class="remember">💡 A hash match is a <i>candidate</i>, not a confirmed match — always verify characters to rule out collisions.</div>
+  <div class="page-footer">Page 9/11</div>
+</div>
+
+<!-- PAGE 10: STRING CONVERSION / PARSING -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">09.</span> String Conversion / Parsing</h2>
+  <div class="cols">
+    <div class="box concept">
+      <h4>Common conversions (Java)</h4>
+      <table>
+        <tr><th>Conversion</th><th>Method</th></tr>
+        <tr><td>String → int</td><td>Integer.parseInt()</td></tr>
+        <tr><td>String → long</td><td>Long.parseLong()</td></tr>
+        <tr><td>String → double</td><td>Double.parseDouble()</td></tr>
+        <tr><td>Number → String</td><td>String.valueOf()</td></tr>
+      </table>
+    </div>
+    <div class="box concept">
+      <h4>Implement atoi() — steps</h4>
+      <ul>
+        <li>Skip leading whitespace</li>
+        <li>Check sign (+ / -)</li>
+        <li>Consume digits, build number</li>
+        <li>Stop at first non-digit char</li>
+        <li>Clamp on overflow, apply sign</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box concept">
+    <h4>Tokenizing "apple,banana,mango" by comma</h4>
+    <table><tr><th>Index</th><th>Token</th></tr><tr><td>0</td><td>apple</td></tr><tr><td>1</td><td>banana</td></tr><tr><td>2</td><td>mango</td></tr></table>
+    Java: <code>s.split(",")</code> — watch out for trailing empty tokens and regex-special delimiters (<code>.</code>, <code>|</code> need escaping).
+  </div>
+  <div class="box trap">
+    <h4>⚠ Interview Trap</h4>
+    Overflow handling in atoi() is the actual test, not the happy path — clamp to <code>Integer.MAX_VALUE</code> / <code>MIN_VALUE</code> rather than letting it silently wrap.
+  </div>
+  <div class="remember">💡 Validate before you convert — mixed content ("123abc") needs manual parsing, not a blind parseInt().</div>
+  <div class="page-footer">Page 10/11</div>
+</div>
+
+<!-- PAGE 11: ADVANCED -->
+<div class="page">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Strings</div>
+  </div>
+  <h2 class="topic-title"><span class="num">10.</span> Advanced String Problems</h2>
+  <div class="cols">
+    <div class="box concept">
+      <h4>Longest Palindromic Substring</h4>
+      s="babad" → "bab" or "aba". <b>Expand around center</b>: for each index (and each gap between indices), grow outward while characters match.
+      <div class="box complexity" style="margin:6px 0 0 0;">Time O(n²), Space O(1)</div>
+    </div>
+    <div class="box concept">
+      <h4>Minimum Window Substring</h4>
+      s="ADOBECODEBANC", t="ABC" → "BANC". Sliding window: expand right until all of t is covered, then shrink left while still valid, tracking the minimum.
+    </div>
+    <div class="box concept">
+      <h4>Check Anagrams</h4>
+      "listen"/"silent" → true. Sort + compare (O(n log n)) or frequency map (O(n), O(1) space for 26 letters).
+    </div>
+    <div class="box concept">
+      <h4>String Rotation Check</h4>
+      Is s2 a rotation of s1? Check <code>s2 ∈ (s1+s1)</code>. "waterbottle"+"waterbottle" contains "erbottlewat" → true.
+    </div>
+  </div>
+  <div class="box trap">
+    <h4>⚠ Mistakes to Avoid</h4>
+    <ul>
+      <li>Off-by-one errors at window/pointer boundaries</li>
+      <li>Ignoring case sensitivity or whitespace when the problem didn't specify</li>
+      <li>Not handling empty-string / single-char edge cases</li>
+      <li>Inefficient repeated string concatenation instead of StringBuilder</li>
+    </ul>
+  </div>
+  <div class="box pattern">
+    <h4>Toolbox recap</h4>
+    HashSet/HashMap (frequency, dedup) · Frequency array (fixed alphabet) · Two Pointers (palindrome, in-place) · Sliding Window (substring conditions) · KMP / Rabin-Karp (pattern search) · DP (longest common substring/subsequence)
+  </div>
+  <div class="remember">💡 Strings are everywhere in interviews — the pattern (not the problem) is what you should be memorizing.</div>
+  <div class="page-footer">Page 11/11</div>
+</div>
+
+</body>
+</html>
