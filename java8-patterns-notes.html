@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DSA Interview Notes • Java 8</title>
+<style>
+  :root{
+    --paper:#fffdf8;
+    --line:#dfe3ea;
+    --ink:#1f2430;
+    --purple:#6c4fd6;
+    --purple-bg:#f2edfd;
+    --blue:#2b6cb0;
+    --blue-bg:#eaf2fb;
+    --red:#d9435e;
+    --red-bg:#fdeced;
+    --green:#1f8a5f;
+    --green-bg:#e9f7f0;
+    --yellow-bg:#fff6d8;
+    --yellow-border:#e8c547;
+    --orange:#e2762e;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --hand: 'Segoe Print', 'Comic Sans MS', 'Bradley Hand', cursive;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#d9dde3; font-family:var(--body); color:var(--ink); padding:32px 0; font-weight:500; }
+  .page{
+    width:820px; max-width:92vw; margin:0 auto 28px auto;
+    background:repeating-linear-gradient(var(--paper) 0px, var(--paper) 31px, #eef1f6 32px);
+    border:1px solid #c7cdd6; border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12);
+    padding:26px 32px 22px 32px; position:relative;
+  }
+  .page-header{ display:flex; justify-content:flex-start; align-items:center; border-bottom:3px solid var(--ink); padding-bottom:8px; margin-bottom:16px; }
+  .brand{ display:flex; align-items:center; gap:8px; font-family:var(--hand); font-weight:700; font-size:20px; }
+  .brand .badge{ background:var(--purple); color:#fff; width:26px;height:26px;border-radius:7px; display:flex;align-items:center;justify-content:center; font-family:var(--body); font-size:13px; }
+  .section-label{ font-size:12px; letter-spacing:0.03em; color:#5a6172; font-weight:600; }
+  .page-footer{ text-align:right; font-size:11px; color:#8a90a0; margin-top:18px; border-top:1px solid var(--line); padding-top:6px; }
+  h1.big-title{ font-family:var(--hand); font-size:46px; text-align:center; margin:6px 0 4px 0; letter-spacing:0.02em; }
+  .subtitle{ text-align:center; font-size:15px; color:#4a5062; margin-bottom:18px; }
+  h2.topic-title{ font-family:var(--hand); font-size:26px; margin:0 0 14px 0; display:flex; align-items:center; gap:10px; }
+  h2.topic-title .num{ color:var(--purple); }
+  h3.mini-head{ font-size:14px; text-transform:uppercase; letter-spacing:0.04em; color:#5a6172; margin:0 0 8px 0; font-weight:700; }
+  p{ font-size:13.5px; line-height:1.55; margin:0 0 10px 0; font-weight:500; }
+  .cols{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px; }
+  .box{ border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:13px; line-height:1.5; }
+  .box h4{ margin:0 0 6px 0; font-size:12.5px; text-transform:uppercase; letter-spacing:0.03em; display:flex;align-items:center;gap:6px; }
+  .concept{ border:2px solid var(--blue); background:var(--blue-bg); }
+  .concept h4{ color:var(--blue); }
+  .trap{ border:2px solid var(--red); background:var(--red-bg); }
+  .trap h4{ color:var(--red); }
+  .pattern{ border:2px solid var(--purple); background:var(--purple-bg); }
+  .pattern h4{ color:var(--purple); }
+  .complexity{ border:2px solid var(--green); background:var(--green-bg); }
+  .complexity h4{ color:var(--green); }
+  .remember{ border:2px dashed var(--yellow-border); background:var(--yellow-bg); font-family:var(--hand); font-size:15px; text-align:center; padding:10px 14px; }
+  code, .code{ font-family:var(--mono); background:#f0f1f4; padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  pre{ font-family:var(--mono); background:#282c34; color:#e6e6e6; padding:12px 14px; border-radius:8px; font-size:12px; overflow-x:auto; line-height:1.5; margin:0 0 14px 0; }
+  .arr{ display:flex; gap:2px; margin:10px 0; font-family:var(--mono); flex-wrap:wrap; }
+  .cell{ display:flex; flex-direction:column; align-items:center; }
+  .cell .val{ width:38px;height:38px; border:2px solid var(--ink); display:flex;align-items:center;justify-content:center; font-size:15px; font-weight:700; background:#fff; }
+  .cell .idx{ font-size:11px; color:#4a5062; margin-top:3px; font-weight:700; }
+  .cell.hl .val{ background:var(--yellow-bg); border-color:var(--orange); }
+  .cell.hl2 .val{ background:var(--purple-bg); border-color:var(--purple); }
+  .cell.match .val{ background:var(--green-bg); border-color:var(--green); }
+  .cell.dim .val{ opacity:0.35; }
+  .ptr-label{ font-size:11px; font-weight:700; text-align:center; }
+  table{ width:100%; border-collapse:collapse; font-size:12.5px; margin:8px 0 14px 0; }
+  th{ background:var(--ink); color:#fff; text-align:left; padding:6px 8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.02em; }
+  td{ padding:6px 8px; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:12px; font-weight:600; }
+  tr:nth-child(even) td{ background:#f7f8fa; }
+  .ok{ color:var(--green); font-weight:700; }
+  .bad{ color:var(--red); font-weight:700; }
+  ul{ margin:4px 0 10px 18px; padding:0; font-size:13px; line-height:1.5; font-weight:500; }
+  .pipe{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:10px 0; font-family:var(--mono); font-size:12px; font-weight:700; }
+  .pipe .stage{ border:2px solid var(--ink); border-radius:6px; padding:6px 10px; background:#fff; }
+  .pipe .stage.lazy{ border-color:var(--orange); background:var(--yellow-bg); }
+  .pipe .stage.term{ border-color:var(--green); border-style:dashed; background:var(--green-bg); }
+  .pipe .arrow{ color:#5a6172; font-weight:700; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="page" style="min-height:560px; display:flex; flex-direction:column; justify-content:center;">
+  <div class="page-header">
+    
+    <div class="section-label">DSA Interview Notes • Java 8</div>
+  </div>
+  <h1 class="big-title">☕ JAVA 8 ☕</h1>
+  <div class="subtitle">Lambdas, Streams &amp; Functional Patterns — complete visual reference</div>
+  <div class="pipe" style="justify-content:center;">
+    <div class="stage">source</div><div class="arrow">→</div>
+    <div class="stage lazy">filter</div><div class="arrow">→</div>
+    <div class="stage lazy">map</div><div class="arrow">→</div>
+    <div class="stage term">collect</div>
+  </div>
+  <div class="pattern" style="max-width:520px;margin:0 auto;text-align:center;">
+    <div style="font-family:var(--hand);font-size:16px;">Lambdas → Functional Interfaces → Method Refs → Streams → Collectors → Optional</div>
+  </div>
+  <div class="remember" style="max-width:520px;margin:24px auto 0 auto;">💡 A stream is a recipe, not a result — nothing cooks until a terminal operation is called.</div>
+  <div class="page-footer">Page 1/18</div>
+</div>
+
+<!-- 01 LAMBDAS -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">01.</span> Lambda Expressions</h2>
+  <p>A lambda is a name-less block of code you can pass around like a value — it exists purely to fill the single abstract method of a <b>functional interface</b> (an interface with exactly one unimplemented method). Java 8's whole feature set is built on this one idea.</p>
+  <div class="box concept">
+    <h4>Anatomy of a lambda</h4>
+    <pre>(Employee e) -&gt; e.salary() &gt; 80000
+ ─────┬─────    ─────────┬─────────
+   parameters            body (expression or { block })</pre>
+    Parameter types are usually inferred, so <code>(e) -&gt; e.salary() &gt; 80000</code> or even <code>e -&gt; e.salary() &gt; 80000</code> (parens optional for a single untyped parameter) all compile identically.
+  </div>
+  <p><b>Evolution</b> — same sort, three eras of Java:</p>
+  <table>
+    <tr><th>Style</th><th>Code</th></tr>
+    <tr><td>Anonymous class (pre-Java 8)</td><td>list.sort(new Comparator&lt;Employee&gt;(){ public int compare(Employee a, Employee b){ return Double.compare(a.salary(), b.salary()); }});</td></tr>
+    <tr><td>Lambda (Java 8)</td><td>list.sort((a, b) -&gt; Double.compare(a.salary(), b.salary()));</td></tr>
+    <tr><td>Method reference (Java 8)</td><td>list.sort(Comparator.comparingDouble(Employee::salary));</td></tr>
+  </table>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>A lambda can only capture local variables that are <b>effectively final</b> (never reassigned after initialization). Mutating a captured variable from inside the lambda body is a compile error, not a runtime one — this is asked constantly to check if you understand closures in Java are "capture by value of the reference," not true mutable closures like JavaScript.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Any method parameter typed as a single-abstract-method interface (<code>Runnable</code>, <code>Comparator&lt;T&gt;</code>, <code>Predicate&lt;T&gt;</code>...) is a signal you can pass a lambda instead of writing a class.</div>
+  <div class="remember">💡 A lambda is just an unnamed method plugging into a functional interface's one open slot.</div>
+  <div class="page-footer">Page 2/18</div>
+</div>
+
+<!-- 02 FUNCTIONAL INTERFACES -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">02.</span> Built-in Functional Interfaces</h2>
+  <p><code>java.util.function</code> ships a small vocabulary of generic functional interfaces so you rarely need to declare your own. Every one of them boils down to "how many inputs, and is there an output?"</p>
+  <table>
+    <tr><th>Interface</th><th>Abstract Method</th><th>Shape</th><th>Example</th></tr>
+    <tr><td>Predicate&lt;T&gt;</td><td>boolean test(T t)</td><td>T → boolean</td><td>e -&gt; e.salary() &gt; 80000</td></tr>
+    <tr><td>Function&lt;T,R&gt;</td><td>R apply(T t)</td><td>T → R</td><td>Employee::name</td></tr>
+    <tr><td>Supplier&lt;T&gt;</td><td>T get()</td><td>() → T</td><td>ArrayList::new</td></tr>
+    <tr><td>Consumer&lt;T&gt;</td><td>void accept(T t)</td><td>T → void</td><td>System.out::println</td></tr>
+    <tr><td>BiFunction&lt;T,U,R&gt;</td><td>R apply(T t, U u)</td><td>(T,U) → R</td><td>(a,b) -&gt; a + b</td></tr>
+    <tr><td>UnaryOperator&lt;T&gt;</td><td>T apply(T t)</td><td>T → T</td><td>String::toUpperCase</td></tr>
+    <tr><td>BinaryOperator&lt;T&gt;</td><td>T apply(T t1, T t2)</td><td>(T,T) → T</td><td>Integer::sum, used by reduce()</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>Chaining with default methods</h4>
+    <code>Predicate</code> gives <code>.and()</code>, <code>.or()</code>, <code>.negate()</code>. <code>Function</code> gives <code>.andThen()</code> (run this, then that) and <code>.compose()</code> (run that first, then this).
+    <pre>Predicate&lt;Employee&gt; isEng   = e -&gt; e.dept().equals("Engineering");
+Predicate&lt;Employee&gt; isRich  = e -&gt; e.salary() &gt;= 80000;
+Predicate&lt;Employee&gt; target  = isEng.and(isRich);   // both must be true
+// matches: Alice, Dave</pre>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4><code>f.andThen(g)</code> means "apply f, feed result into g" — <code>f.compose(g)</code> means "apply g first, feed result into f." They're mirror images, and interviewers love a one-line trick question swapping them.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Need a boolean test → Predicate. Need a transform → Function. Need to produce a value from nothing → Supplier. Need a side effect with no return → Consumer. Need to combine two same-typed values → BinaryOperator (this is exactly what <code>reduce()</code> expects, pg 10).</div>
+  <div class="remember">💡 Count the inputs, check for an output — that tells you which functional interface you need before you even open the docs.</div>
+  <div class="page-footer">Page 3/18</div>
+</div>
+
+<!-- 03 METHOD REFERENCES -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">03.</span> Method References</h2>
+  <p>When a lambda's entire body is just "call one existing method," a method reference says the same thing more directly. There are four kinds:</p>
+  <table>
+    <tr><th>#</th><th>Kind</th><th>Syntax</th><th>Equivalent Lambda</th></tr>
+    <tr><td>1</td><td>Static method</td><td>Integer::parseInt</td><td>s -&gt; Integer.parseInt(s)</td></tr>
+    <tr><td>2</td><td>Instance method of a <i>particular</i> object</td><td>System.out::println</td><td>x -&gt; System.out.println(x)</td></tr>
+    <tr><td>3</td><td>Instance method of an <i>arbitrary</i> object of a type</td><td>Employee::name</td><td>e -&gt; e.name()</td></tr>
+    <tr><td>4</td><td>Constructor reference</td><td>ArrayList::new</td><td>() -&gt; new ArrayList&lt;&gt;()</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>Kind 3 is the one that confuses people</h4>
+    <code>Employee::name</code> looks like a no-arg call, but as a <code>Function&lt;Employee,String&gt;</code> the arbitrary instance becomes the parameter:
+    <pre>employees.stream().map(Employee::name)      // Function&lt;Employee,String&gt;
+// is exactly:
+employees.stream().map(e -&gt; e.name())</pre>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>A constructor reference must match the functional interface's exact arity. <code>Employee::new</code> only compiles as a <code>Supplier&lt;Employee&gt;</code> if you'd otherwise call <code>new Employee()</code> with no args — if the record needs 6 fields, it instead matches a 6-argument functional interface, which usually means you need a custom one (Java only ships up to <code>BiFunction</code>).</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Read the lambda body. If it's <i>only</i> <code>x -&gt; SomeClass.method(x)</code>, <code>x -&gt; x.method()</code>, or <code>() -&gt; new SomeClass()</code> with nothing else — replace it with a method reference. If there's any extra logic (a conditional, an extra arg, string concatenation), keep the lambda.</div>
+  <div class="remember">💡 Method references aren't a different feature — they're lambdas whose body was already just "call this one thing."</div>
+  <div class="page-footer">Page 4/18</div>
+</div>
+
+<!-- 04 STREAM FUNDAMENTALS -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">04.</span> Stream API Fundamentals</h2>
+  <p>A <code>Stream&lt;T&gt;</code> is <b>not</b> a data structure — it holds no elements of its own. It's a pipeline description: a source, zero or more lazy intermediate operations, and exactly one terminal operation that actually pulls elements through and produces a result.</p>
+  <div class="box concept">
+    <h4>Common sources</h4>
+    <table>
+      <tr><th>Source</th><th>Example</th></tr>
+      <tr><td>Collection</td><td>employees.stream()</td></tr>
+      <tr><td>Array</td><td>Arrays.stream(intArray)</td></tr>
+      <tr><td>Literal values</td><td>Stream.of("a","b","c")</td></tr>
+      <tr><td>Numeric range</td><td>IntStream.range(0,5) / rangeClosed(1,5)</td></tr>
+      <tr><td>Infinite + limit</td><td>Stream.iterate(1, n -&gt; n*2).limit(5)</td></tr>
+      <tr><td>Generative</td><td>Stream.generate(Math::random).limit(3)</td></tr>
+    </table>
+  </div>
+  <p><b>Intermediate vs terminal:</b> intermediate ops (<code>filter</code>, <code>map</code>, <code>sorted</code>, <code>distinct</code>, <code>limit</code>, <code>skip</code>, <code>peek</code>) return a new <code>Stream</code> and are <b>lazy</b> — they just get recorded. Only a terminal op (<code>collect</code>, <code>forEach</code>, <code>reduce</code>, <code>count</code>, <code>findFirst</code>, <code>anyMatch</code>...) actually runs the pipeline, element by element.</p>
+  <div class="pipe">
+    <div class="stage">.stream()</div><div class="arrow">→</div>
+    <div class="stage lazy">.filter(...)</div><div class="arrow">→</div>
+    <div class="stage lazy">.map(...)</div><div class="arrow">→</div>
+    <div class="stage lazy">.sorted()</div><div class="arrow">→</div>
+    <div class="stage term">.collect(...)</div>
+  </div>
+  <table>
+    <tr><th>Step</th><th>What actually happens</th></tr>
+    <tr><td>Call <code>.filter(...)</code></td><td class="bad">Nothing runs — just records "there's a filter stage"</td></tr>
+    <tr><td>Call <code>.map(...)</code></td><td class="bad">Nothing runs — just records "there's a map stage"</td></tr>
+    <tr><td>Call <code>.collect(...)</code></td><td class="ok">NOW every element flows through filter → map → collect, one at a time, in one pass</td></tr>
+  </table>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>A stream can only be consumed <b>once</b>. Calling a second terminal operation on the same stream throws <code>IllegalStateException: stream has already been operated upon or closed</code>. If you need the data twice, build a fresh stream from the source collection each time.</div>
+  <div class="box complexity"><h4>Complexity</h4>Element-wise stages fuse into one pass — O(n) total, same as an equivalent hand-written loop. Streams don't parallelize automatically; that needs <code>.parallelStream()</code> explicitly (pg 14).</div>
+  <div class="remember">💡 Nothing runs until a terminal operation is called — a stream is a recipe, not a result.</div>
+  <div class="page-footer">Page 5/18</div>
+</div>
+
+<!-- 05 FILTER MAP FLATMAP -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">05.</span> filter → map → collect, and flatMap</h2>
+  <p><b>Dataset used across every stream page:</b> 8 <code>Employee(name, dept, salary, age, rank, skills)</code> records.</p>
+  <table>
+    <tr><th>name</th><th>dept</th><th>salary</th><th>age</th><th>skills</th></tr>
+    <tr><td>Alice</td><td>Engineering</td><td>95000</td><td>30</td><td>[Java, Kafka]</td></tr>
+    <tr><td>Bob</td><td>Engineering</td><td>80000</td><td>28</td><td>[Java, Spring]</td></tr>
+    <tr><td>Carol</td><td>HR</td><td>60000</td><td>35</td><td>[Excel, HR]</td></tr>
+    <tr><td>Dave</td><td>Engineering</td><td>95000</td><td>32</td><td>[Java, AWS]</td></tr>
+    <tr><td>Eve</td><td>Finance</td><td>70000</td><td>29</td><td>[Excel, Python]</td></tr>
+  </table>
+  <p><b>Goal:</b> names of every Engineering employee.</p>
+  <pre>List&lt;String&gt; names = employees.stream()
+    .filter(e -&gt; e.dept().equals("Engineering"))
+    .map(Employee::name)
+    .collect(Collectors.toList());</pre>
+  <table>
+    <tr><th>Stage</th><th>Contents flowing through</th></tr>
+    <tr><td>source</td><td>Alice, Bob, Carol, Dave, Eve, Frank, Grace, Heidi</td></tr>
+    <tr><td>after filter(dept==Engineering)</td><td>Alice, Bob, Dave, Heidi</td></tr>
+    <tr><td>after map(name)</td><td>"Alice", "Bob", "Dave", "Heidi"</td></tr>
+    <tr><td>after collect(toList)</td><td class="ok">["Alice", "Bob", "Dave", "Heidi"]</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>flatMap — when the element IS a collection</h4>
+    <code>map</code> on <code>skills</code> gives <code>Stream&lt;List&lt;String&gt;&gt;</code> (a stream of lists — one nested list per employee). <code>flatMap</code> flattens all those inner lists into a <b>single</b> flat <code>Stream&lt;String&gt;</code>.
+    <pre>Set&lt;String&gt; allSkills = employees.stream()
+    .flatMap(e -&gt; e.skills().stream())   // List&lt;String&gt; → Stream&lt;String&gt;, then merged
+    .collect(Collectors.toSet());
+// {Java, Kafka, Spring, AWS, Excel, HR, Python, ML, Docker}</pre>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4><code>map(Employee::skills)</code> → <code>Stream&lt;List&lt;String&gt;&gt;</code> (5 boxes, each containing a list). <code>flatMap(e -&gt; e.skills().stream())</code> → <code>Stream&lt;String&gt;</code> (one flat stream of every skill). Mixing these up is the #1 flatMap interview mistake.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Filter by a condition → <code>filter</code>+<code>map</code>+<code>collect</code>. Element contains a nested list/stream/Optional and you need ONE flat stream of the inner values → <code>flatMap</code>.</div>
+  <div class="remember">💡 map transforms one-to-one; flatMap transforms one-to-many and merges the many back into one stream.</div>
+  <div class="page-footer">Page 6/18</div>
+</div>
+
+<!-- 06 SORTED DISTINCT LIMIT SKIP -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">06.</span> sorted + distinct + limit/skip — "Nth Highest" Family</h2>
+  <p><b>Problem:</b> 2nd highest <i>distinct</i> salary. salaries = [95000, 80000, 60000, 95000, 70000, 55000, 90000, 75000] (note 95000 appears twice — Alice and Dave).</p>
+  <pre>Optional&lt;Integer&gt; second = salaries.stream()
+    .distinct()                    // remove duplicate 95000
+    .sorted(Comparator.reverseOrder())
+    .skip(1)                       // skip the 1st (highest)
+    .findFirst();                  // take the next one</pre>
+  <table>
+    <tr><th>Stage</th><th>Contents</th></tr>
+    <tr><td>source</td><td>95000, 80000, 60000, 95000, 70000, 55000, 90000, 75000</td></tr>
+    <tr><td>after distinct()</td><td>95000, 80000, 60000, 70000, 55000, 90000, 75000 <span class="ok">(dup 95000 removed)</span></td></tr>
+    <tr><td>after sorted(reverseOrder)</td><td>95000, 90000, 80000, 75000, 70000, 60000, 55000</td></tr>
+    <tr><td>after skip(1)</td><td>90000, 80000, 75000, 70000, 60000, 55000</td></tr>
+    <tr><td>after findFirst()</td><td class="ok">Optional[90000] ✅ — the 2nd highest distinct salary</td></tr>
+  </table>
+  <div class="box concept"><h4>The general recipe</h4>"Nth highest/lowest, duplicates collapsed" always reduces to: <code>distinct()</code> → <code>sorted()</code> (ascending or reversed) → <code>skip(N-1)</code> → <code>findFirst()</code>. Want the top N instead of the Nth exactly? Swap <code>skip(N-1).findFirst()</code> for <code>limit(N)</code>.</div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Forgetting <code>distinct()</code> when the problem means "2nd highest <i>distinct</i> value" — without it, a tied top value silently becomes both the 1st <i>and</i> 2nd result. Also: <code>distinct()</code> before <code>sorted()</code> is cheaper (fewer elements to sort) — order your intermediate ops to shrink the pipeline as early as possible.</div>
+  <div class="box complexity"><h4>Complexity</h4><code>distinct()</code> is O(n) (hash-based). <code>sorted()</code> is O(n log n) — dominates the pipeline. <code>skip</code>/<code>limit</code>/<code>findFirst</code> are O(1) once the upstream work is done.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Nth highest/lowest", "top K", "unique values ranked" → this exact four-operation chain, every time.</div>
+  <div class="remember">💡 distinct → sorted → skip/limit → findFirst is the entire "Nth highest" pattern in one line.</div>
+  <div class="page-footer">Page 7/18</div>
+</div>
+
+<!-- 07 COLLECTORS PART 1 -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">07.</span> Collectors I — groupingBy + Downstream</h2>
+  <p><b>Problem:</b> bucket employees by department, then aggregate each bucket.</p>
+  <pre>Map&lt;String, List&lt;Employee&gt;&gt; byDept = employees.stream()
+    .collect(Collectors.groupingBy(Employee::dept));</pre>
+  <table>
+    <tr><th>Key (dept)</th><th>Bucket (List&lt;Employee&gt;)</th></tr>
+    <tr><td>Engineering</td><td>[Alice, Bob, Dave, Heidi]</td></tr>
+    <tr><td>HR</td><td>[Carol, Frank]</td></tr>
+    <tr><td>Finance</td><td>[Eve, Grace]</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>The two shapes — memorize the signature, not the examples</h4>
+    <pre>groupingBy(classifier)
+    -&gt; Map&lt;K, List&lt;V&gt;&gt;               // default downstream is toList()
+
+groupingBy(classifier, downstream)
+    -&gt; Map&lt;K, X&gt;                      // X = whatever the downstream collector returns</pre>
+    Every row in the table below is just "what is X?" for the second shape — once you can answer that, you can predict the return type of any <code>groupingBy</code> call before you write it.
+  </div>
+  <p><b>Downstream collectors</b> replace the default "collect into a List" with a smaller aggregate per bucket — pass it as the 2nd argument to <code>groupingBy</code>:</p>
+  <table>
+    <tr><th>Downstream</th><th>Returns</th><th>Example</th><th>Result for "Engineering"</th></tr>
+    <tr><td>toList() <i>(default)</i></td><td>Map&lt;K, List&lt;V&gt;&gt;</td><td>groupingBy(dept)</td><td>[Alice, Bob, Dave, Heidi]</td></tr>
+    <tr><td>counting()</td><td>Map&lt;K, Long&gt;</td><td>groupingBy(dept, counting())</td><td>4</td></tr>
+    <tr><td>summingInt(fn)</td><td>Map&lt;K, Integer&gt;</td><td>groupingBy(dept, summingInt(Employee::age))</td><td>116 (30+28+32+26)</td></tr>
+    <tr><td>summingDouble(fn)</td><td>Map&lt;K, Double&gt;</td><td>groupingBy(dept, summingDouble(Employee::salary))</td><td>345000.0</td></tr>
+    <tr><td>averagingDouble(fn)</td><td>Map&lt;K, Double&gt;</td><td>groupingBy(dept, averagingDouble(Employee::salary))</td><td>86250.0</td></tr>
+    <tr><td>maxBy(comparator)</td><td>Map&lt;K, Optional&lt;V&gt;&gt;</td><td>groupingBy(dept, maxBy(comparingDouble(Employee::salary)))</td><td>Optional[Alice]</td></tr>
+    <tr><td>mapping(fn, toList())</td><td>Map&lt;K, List&lt;X&gt;&gt;</td><td>groupingBy(dept, mapping(Employee::name, toList()))</td><td>[Alice, Bob, Dave, Heidi]</td></tr>
+    <tr><td>filtering(pred, toList())</td><td>Map&lt;K, List&lt;V&gt;&gt;</td><td>groupingBy(dept, filtering(e -&gt; e.salary()&gt;=80000, toList()))</td><td>[Alice, Bob, Dave]</td></tr>
+    <tr><td>collectingAndThen(d, finisher)</td><td>Map&lt;K, RR&gt;</td><td>groupingBy(dept, collectingAndThen(maxBy(comparingDouble(Employee::salary)), Optional::get))</td><td>Alice <i>(not Optional[Alice])</i></td></tr>
+    <tr><td>groupingBy(inner)</td><td>Map&lt;K, Map&lt;K2, List&lt;V&gt;&gt;&gt;</td><td>groupingBy(dept, groupingBy(rank))</td><td>{1:[Dave], 2:[Alice], 3:[Bob], 4:[Heidi]}</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>collectingAndThen — post-process a collector's result</h4>
+    Wraps any collector and runs a <code>finisher</code> function on its output <i>after</i> collection completes — the collector's own return type doesn't have to be the final answer. Two use cases come up constantly:
+    <pre>// 1. Unwrap the Optional that maxBy/minBy always produce, when you KNOW the group can't be empty
+Map&lt;String, Employee&gt; topEarnerByDept = employees.stream().collect(
+    Collectors.groupingBy(Employee::dept,
+        Collectors.collectingAndThen(
+            Collectors.maxBy(Comparator.comparingDouble(Employee::salary)),
+            Optional::get)));                      // Map&lt;K,Optional&lt;V&gt;&gt; -&gt; Map&lt;K,V&gt;
+
+// 2. Make a collected list immutable — finisher doesn't have to change the TYPE, just the value
+List&lt;Employee&gt; frozen = employees.stream().collect(
+    Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));</pre>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4><code>Optional::get</code> as the finisher is only safe because <code>groupingBy</code> never creates a key for an empty bucket — every group that exists had at least one element, so <code>maxBy</code>'s Optional inside it is guaranteed present. Using the same <code>Optional::get</code> trick on a plain (non-grouped) <code>stream().collect(maxBy(...))</code> over a possibly-empty stream is <b>not</b> safe — that Optional really can be empty.</div>
+  <div class="box concept">
+    <h4>Two-level grouping</h4>
+    Nest a <code>groupingBy</code> as the downstream of another to bucket by two keys at once:
+    <pre>Map&lt;String, Map&lt;Integer, List&lt;Employee&gt;&gt;&gt; byDeptThenRank =
+    employees.stream().collect(
+        Collectors.groupingBy(Employee::dept,
+            Collectors.groupingBy(Employee::rank)));
+// {"Engineering": {1: [Dave], 2: [Alice], 3: [Bob], 4: [Heidi]}, ...}</pre>
+  </div>
+  <div class="box trap">
+    <h4>⚠ Interview Trap — filtering() keeps the empty group, .filter() erases it</h4>
+    <pre>// filtering() runs INSIDE groupingBy — the key survives even if its bucket ends up empty
+groupingBy(Employee::dept, filtering(e -&gt; e.salary() &gt; 200000, toList()))
+// {"Engineering":[], "HR":[], "Finance":[]}   ← every dept key still present, empty lists
+
+// .filter() BEFORE groupingBy removes elements from the source — a dept with
+// zero survivors never becomes a key at all
+employees.stream().filter(e -&gt; e.salary() &gt; 200000)
+    .collect(groupingBy(Employee::dept))
+// {}   ← no keys survive, because no employee passed the filter</pre>
+    If the requirement is "show every department, even ones with zero qualifying employees," you need <code>filtering</code> as the downstream — a plain upstream <code>.filter()</code> silently deletes those department keys.
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>The <code>Map</code> returned by <code>groupingBy</code> is a plain <code>HashMap</code> — <b>no guaranteed order</b>, of keys or insertion. If you need insertion order or sorted keys, use the 3-arg overload with a map-factory: <code>groupingBy(Employee::dept, TreeMap::new, toList())</code>.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Group by X, then compute Y per group" (count, sum, average, list of names, max element) → <code>groupingBy</code> + downstream collector, every time. Need to keep every key even when its bucket empties out → <code>filtering</code> as the downstream, not an upstream <code>.filter()</code>.</div>
+  <div class="remember">💡 groupingBy answers "bucket by key" — the downstream collector answers "what do I want to know about each bucket?" — and filtering vs .filter() decides whether an empty bucket still gets to keep its key.</div>
+  <div class="page-footer">Page 8/18</div>
+</div>
+
+<!-- 08 COLLECTORS PART 2 -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">08.</span> Collectors II — partitioningBy, joining, toMap, teeing</h2>
+  <div class="box concept">
+    <h4>partitioningBy — always exactly 2 buckets</h4>
+    <pre>Map&lt;Boolean, List&lt;Employee&gt;&gt; split = employees.stream()
+    .collect(Collectors.partitioningBy(
+        e -&gt; e.salary() &gt;= 80000));
+// true  -&gt; [Alice, Bob, Dave, Grace]
+// false -&gt; [Carol, Eve, Frank, Heidi]</pre>
+    Unlike <code>groupingBy</code>, the <code>false</code> key is always present even if empty — the map has exactly 2 entries, guaranteed.
+  </div>
+  <div class="box concept">
+    <h4>joining — build a delimited String</h4>
+    <pre>String names = employees.stream()
+    .map(Employee::name)
+    .collect(Collectors.joining(", ", "[", "]"));
+// "[Alice, Bob, Carol, Dave, Eve, Frank, Grace, Heidi]"</pre>
+  </div>
+  <div class="box concept">
+    <h4>toMap — key/value pairs, with a merge function for collisions</h4>
+    <pre>Map&lt;String, Double&gt; salaryByName = employees.stream()
+    .collect(Collectors.toMap(Employee::name, Employee::salary));
+// works — every name is unique here
+
+// if keys could collide, a 3rd arg resolves it:
+Map&lt;String, Double&gt; maxSalaryByDept = employees.stream()
+    .collect(Collectors.toMap(Employee::dept, Employee::salary,
+        Double::max));   // keep the higher salary on key collision</pre>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4><code>toMap(keyFn, valFn)</code> with <b>no</b> merge function throws <code>IllegalStateException: Duplicate key</code> the moment two elements produce the same key. This is the #1 <code>toMap</code> production crash — always ask "can two elements collide on this key?" before skipping the 3rd argument.</div>
+  <div class="box concept">
+    <h4>teeing (Java 12+) — two collectors, one pass</h4>
+    Not part of Java 8 itself, but commonly grouped with the Collectors toolkit — worth knowing where the line is:
+    <pre>var minMax = employees.stream().collect(Collectors.teeing(
+    Collectors.minBy(Comparator.comparingDouble(Employee::salary)),
+    Collectors.maxBy(Comparator.comparingDouble(Employee::salary)),
+    (min, max) -&gt; List.of(min.get(), max.get())));
+// [Frank(55000), Alice(95000)] — computed in ONE pass, not two</pre>
+  </div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>Exactly two outcome groups (yes/no) → <code>partitioningBy</code>. Build one joined string → <code>joining</code>. Need a lookup Map from a stream → <code>toMap</code> (always think about key collisions).</div>
+  <div class="remember">💡 groupingBy is for N buckets by any key; partitioningBy is groupingBy's simpler 2-bucket boolean cousin.</div>
+  <div class="page-footer">Page 9/18</div>
+</div>
+
+<!-- 09 REDUCE -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">09.</span> reduce() — The Fold Pattern</h2>
+  <p><code>reduce</code> is the most general stream operation: fold every element into a single running result. Everything else (sum, max, count, collect) can be expressed as a <code>reduce</code> — but use the specialized version when one exists, it reads clearer and is often faster.</p>
+  <table>
+    <tr><th>Overload</th><th>Signature</th><th>When</th></tr>
+    <tr><td>1-arg</td><td>Optional&lt;T&gt; reduce(BinaryOperator&lt;T&gt; op)</td><td>No sensible identity value; stream might be empty</td></tr>
+    <tr><td>2-arg</td><td>T reduce(T identity, BinaryOperator&lt;T&gt; op)</td><td>Identity value exists (0 for sum, 1 for product)</td></tr>
+    <tr><td>3-arg</td><td>U reduce(U identity, BiFunction&lt;U,T,U&gt; acc, BinaryOperator&lt;U&gt; combiner)</td><td>Result type differs from element type; required for <code>.parallelStream()</code></td></tr>
+  </table>
+  <p><b>Total salary</b>, traced step by step (2-arg form, identity = 0):</p>
+  <table>
+    <tr><th>Step</th><th>Employee</th><th>salary</th><th>running total = total + salary</th></tr>
+    <tr><td>1</td><td>Alice</td><td>95000</td><td>0 + 95000 = 95000</td></tr>
+    <tr><td>2</td><td>Bob</td><td>80000</td><td>95000 + 80000 = 175000</td></tr>
+    <tr><td>3</td><td>Carol</td><td>60000</td><td>175000 + 60000 = 235000</td></tr>
+    <tr><td>4</td><td>Dave</td><td>95000</td><td>235000 + 95000 = 330000</td></tr>
+    <tr><td>5</td><td>Eve</td><td>70000</td><td>330000 + 70000 = 400000</td></tr>
+    <tr><td>6</td><td>Frank</td><td>55000</td><td>400000 + 55000 = 455000</td></tr>
+    <tr><td>7</td><td>Grace</td><td>90000</td><td>455000 + 90000 = 545000</td></tr>
+    <tr><td>8</td><td>Heidi</td><td>75000</td><td class="ok">545000 + 75000 = 620000</td></tr>
+  </table>
+  <pre>double total = employees.stream()
+    .reduce(0.0, (sum, e) -&gt; sum + e.salary(), Double::sum);
+// equivalent, and preferred for numeric sums:
+double total2 = employees.stream().mapToDouble(Employee::salary).sum();
+
+// max salary via BinaryOperator.maxBy:
+Optional&lt;Employee&gt; top = employees.stream()
+    .reduce(BinaryOperator.maxBy(Comparator.comparingDouble(Employee::salary)));
+// Optional[Alice] (first max wins ties — Alice appears before Dave)</pre>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>The 3rd argument (combiner) in the 3-arg overload is <b>silently ignored in a sequential stream</b> — it only matters for <code>.parallelStream()</code>, where partial results computed by different threads must be merged back together. Forgetting this exists is why parallel reduces sometimes give surprising results if the combiner logic is wrong.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Combine every element into one summary value" and no built-in collector fits → <code>reduce</code>. If it's specifically sum/min/max/count on numbers, prefer <code>IntStream</code>/<code>DoubleStream</code>'s dedicated methods instead.</div>
+  <div class="remember">💡 reduce is the general-purpose fold — reach for the specialized sum()/max()/collect() first, and reduce only when nothing else fits.</div>
+  <div class="page-footer">Page 10/18</div>
+</div>
+
+<!-- 10 OPTIONAL -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">10.</span> Optional&lt;T&gt; — Null Safety</h2>
+  <p><code>Optional&lt;T&gt;</code> is a container that may or may not hold a value. It doesn't eliminate null — it forces the <i>caller</i> to explicitly handle the "no value" case in the type system, instead of finding out three calls later via <code>NullPointerException</code>.</p>
+  <p><b>Problem:</b> find employee named "Zed" — doesn't exist.</p>
+  <pre>Optional&lt;Employee&gt; found = employees.stream()
+    .filter(e -&gt; e.name().equals("Zed"))
+    .findFirst();
+// Optional.empty() — the stream produced zero matches</pre>
+  <table>
+    <tr><th>Method</th><th>Behavior</th></tr>
+    <tr><td>isPresent() / isEmpty()</td><td>true/false check — isEmpty() added in Java 11</td></tr>
+    <tr><td>get()</td><td class="bad">Throws NoSuchElementException if empty — avoid calling directly</td></tr>
+    <tr><td>orElse(fallback)</td><td>Fallback value — <b>always evaluated eagerly</b>, even when present</td></tr>
+    <tr><td>orElseGet(() -&gt; fallback)</td><td>Fallback supplier — evaluated <b>lazily</b>, only when empty</td></tr>
+    <tr><td>orElseThrow(...)</td><td>Throws a custom exception instead of NoSuchElementException</td></tr>
+    <tr><td>map(fn) / flatMap(fn)</td><td>Transform the contained value, still wrapped in Optional</td></tr>
+    <tr><td>ifPresent(consumer)</td><td>Run a side effect only if a value exists</td></tr>
+    <tr><td>ifPresentOrElse(consumer, runnable)</td><td>Java 9+ — both branches in one call</td></tr>
+  </table>
+  <div class="box trap"><h4>⚠ Interview Trap</h4><code>orElse(computeExpensiveDefault())</code> calls <code>computeExpensiveDefault()</code> <b>every single time</b>, even when the Optional already has a value — because Java evaluates the argument before calling <code>orElse</code>. <code>orElseGet(() -&gt; computeExpensiveDefault())</code> only invokes the supplier when actually needed. This is a very common perf/correctness trick question.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>A method that might legitimately find nothing (a search, a lookup, a parse) → return <code>Optional&lt;T&gt;</code>, never <code>null</code>. Don't use Optional for fields, method parameters, or collections — that's an anti-pattern the JDK team explicitly warned against.</div>
+  <div class="remember">💡 Optional is a signal in the type system that "this might not exist" — not a blanket replacement for every nullable variable.</div>
+  <div class="page-footer">Page 11/18</div>
+</div>
+
+<!-- 11 COMPARATOR -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">11.</span> Comparator — comparing / thenComparing / reversed</h2>
+  <p>Java 8 added static/default methods to <code>Comparator</code> so multi-key sorts read as a declarative chain instead of a hand-written <code>compare()</code> method.</p>
+  <p><b>Goal:</b> sort by dept (asc), then salary (desc), then name (asc) as the final tiebreaker.</p>
+  <pre>List&lt;Employee&gt; sorted = employees.stream()
+    .sorted(Comparator.comparing(Employee::dept)
+        .thenComparing(Employee::salary, Comparator.reverseOrder())
+        .thenComparing(Employee::name))
+    .collect(Collectors.toList());</pre>
+  <table>
+    <tr><th>Order</th><th>name</th><th>dept</th><th>salary</th><th>Why it landed here</th></tr>
+    <tr><td>1</td><td>Alice</td><td>Engineering</td><td>95000</td><td>dept tie with Bob/Dave/Heidi → salary desc → tie with Dave → name "Alice" &lt; "Dave"</td></tr>
+    <tr><td>2</td><td>Dave</td><td>Engineering</td><td>95000</td><td>same salary as Alice, "Dave" &gt; "Alice" alphabetically</td></tr>
+    <tr><td>3</td><td>Bob</td><td>Engineering</td><td>80000</td><td>lower salary than Alice/Dave within Engineering</td></tr>
+    <tr><td>4</td><td>Heidi</td><td>Engineering</td><td>75000</td><td>lowest salary in Engineering</td></tr>
+    <tr><td>5</td><td>Grace</td><td>Finance</td><td>90000</td><td>next dept alphabetically, higher salary than Eve</td></tr>
+    <tr><td>6</td><td>Eve</td><td>Finance</td><td>70000</td><td>lower salary than Grace within Finance</td></tr>
+    <tr><td>7</td><td>Carol</td><td>HR</td><td>60000</td><td>last dept alphabetically, higher salary than Frank</td></tr>
+    <tr><td>8</td><td>Frank</td><td>HR</td><td>55000</td><td>lowest overall</td></tr>
+  </table>
+  <div class="box concept"><h4>Other built-ins worth knowing</h4><code>Comparator.naturalOrder()</code> / <code>.reverseOrder()</code>, <code>Comparator.nullsFirst(cmp)</code> / <code>.nullsLast(cmp)</code> to safely sort collections containing nulls without a manual null check.</div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4><code>Comparator.comparing(Employee::salary)</code> boxes the <code>double</code> into a <code>Double</code> object for every comparison — unnecessary allocation in a hot path. Use <code>Comparator.comparingDouble(Employee::salary)</code> (also <code>comparingInt</code>, <code>comparingLong</code>) to compare primitives directly.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Sort by A, then break ties by B, then by C" → chain <code>.thenComparing(...)</code> calls in priority order — never write a manual multi-field <code>compare()</code> method by hand anymore.</div>
+  <div class="remember">💡 comparing() picks the field; thenComparing() is what breaks the tie — chain them in priority order and read it like a sentence.</div>
+  <div class="page-footer">Page 12/18</div>
+</div>
+
+<!-- 12 REVERSE/INVERT A MAP -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">12.</span> Reverse / Invert a Map — by Value</h2>
+  <p>Flipping a <code>Map&lt;K,V&gt;</code> into a <code>Map&lt;V,K&gt;</code> (or <code>Map&lt;V,List&lt;K&gt;&gt;</code>) is the single most-reused building block in the next three pages — org tree, tiebreak sorting, and joins all start by looking a map's <i>values</i> up as if they were keys. The only decision that matters: <b>are the values guaranteed unique?</b></p>
+  <div class="box concept">
+    <h4>Variant A — values are unique → toMap</h4>
+    <pre>Map&lt;String, Integer&gt; idByName = Map.of(
+    "Alice", 101, "Bob", 102, "Carol", 103);
+
+Map&lt;Integer, String&gt; nameById = idByName.entrySet().stream()
+    .collect(Collectors.toMap(
+        Map.Entry::getValue,   // old value becomes new key
+        Map.Entry::getKey));   // old key becomes new value
+// {101=Alice, 102=Bob, 103=Carol}</pre>
+  </div>
+  <div class="box concept">
+    <h4>Variant B — values repeat → groupingBy</h4>
+    <pre>Map&lt;String, String&gt; nameToDept = Map.of(
+    "Alice","Engineering", "Bob","Engineering",
+    "Carol","HR", "Dave","Engineering", "Eve","Finance");
+
+Map&lt;String, List&lt;String&gt;&gt; deptToNames = nameToDept.entrySet().stream()
+    .collect(Collectors.groupingBy(
+        Map.Entry::getValue,                                        // dept becomes new key
+        Collectors.mapping(Map.Entry::getKey, Collectors.toList()))); // names bucket up
+// {Engineering=[Alice, Bob, Dave], HR=[Carol], Finance=[Eve]}</pre>
+  </div>
+  <table>
+    <tr><th>Question</th><th>If yes</th><th>If no / unsure</th></tr>
+    <tr><td>Can two keys share the same value?</td><td>groupingBy + mapping → <code>Map&lt;V, List&lt;K&gt;&gt;</code></td><td>toMap → <code>Map&lt;V,K&gt;</code> (1:1 only)</td></tr>
+  </table>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Reaching for <code>toMap</code> out of habit when values <i>aren't</i> actually unique throws <code>IllegalStateException: Duplicate key</code> the instant two entries share a value (same trap as pg 9, resurfacing here because inversion is exactly where it bites hardest). When in doubt, default to <code>groupingBy</code> — a <code>Map&lt;V,List&lt;K&gt;&gt;</code> degrades gracefully to a 1-element list even when values genuinely are unique.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Reverse a map", "invert key/value", "look up the original key given a value" → toMap (unique values) or groupingBy+mapping (repeating values). This is step 1 of the Org Tree pattern on the next page.</div>
+  <div class="box complexity"><h4>Complexity</h4>O(n) either way — one pass over the entry set, one insert per entry.</div>
+  <div class="remember">💡 toMap flips 1:1, groupingBy flips 1:many — pick based on whether values repeat, not on habit.</div>
+  <div class="page-footer">Page 13/18</div>
+</div>
+
+<!-- 13 ORG TREE FROM MAP -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">13.</span> Org Tree from Map&lt;Emp,Mgr&gt; — Invert + DFS</h2>
+  <p><b>Given:</b> a flat <code>Map&lt;Employee,Manager&gt;</code> — every employee points to their one boss, and the root's manager is <code>null</code>. <b>Task:</b> print the org chart top-down, indented by depth.</p>
+  <table>
+    <tr><th>Emp</th><th>Mgr</th><th>Emp</th><th>Mgr</th></tr>
+    <tr><td>A</td><td>B</td><td>E</td><td>A</td></tr>
+    <tr><td>B</td><td>— (root)</td><td>F</td><td>C</td></tr>
+    <tr><td>C</td><td>A</td><td>G</td><td>D</td></tr>
+    <tr><td>D</td><td>B</td><td>H</td><td>C</td></tr>
+  </table>
+  <div class="box concept">
+    <h4>Three steps — invert, find root, DFS</h4>
+    <pre>// Step 1: invert Map&lt;Emp,Mgr&gt; -&gt; Map&lt;Mgr,List&lt;Reportee&gt;&gt;   (Variant B from pg 12)
+Map&lt;String, List&lt;String&gt;&gt; mgrToReportees = empToMgr.entrySet().stream()
+    .filter(e -&gt; e.getValue() != null)
+    .collect(Collectors.groupingBy(
+        Map.Entry::getValue, LinkedHashMap::new,             // preserve sibling order
+        Collectors.mapping(Map.Entry::getKey, Collectors.toList())));
+
+// Step 2: root = the one entry with a null manager
+String root = empToMgr.entrySet().stream()
+    .filter(e -&gt; e.getValue() == null)
+    .map(Map.Entry::getKey).findFirst()
+    .orElseThrow();
+
+// Step 3: DFS, indent = depth
+void dfs(String node, int depth, Map&lt;String,List&lt;String&gt;&gt; tree) {
+    System.out.println(depth == 0 ? node : "  ".repeat(depth-1) + "--" + node);
+    for (String r : tree.getOrDefault(node, List.of())) dfs(r, depth + 1, tree);
+}</pre>
+  </div>
+  <p><b>Output</b> (B is root; indentation shows depth):</p>
+  <pre>B
+--A
+  --C
+    --F
+  --E
+--D
+  --G</pre>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>A <b>cycle</b> in the input (A→B, B→A) sends the DFS into infinite recursion — guard with a <code>visited</code> set. A very <b>deep</b> tree (10k+ levels) blows the JVM's default stack via recursion — rewrite as an iterative DFS using an explicit <code>Deque&lt;Pair&lt;String,Integer&gt;&gt;</code>. Also plan for a <b>forest</b> (multiple null-manager rows) by collecting all roots, not just <code>findFirst()</code>.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Flat parent-pointer map" + "print/traverse top-down" → invert once into parent→children (pg 12's Variant B), then DFS or BFS from the root. Same shape as RBAC role-hierarchy resolution or LDAP nested-group flattening.</div>
+  <div class="box complexity"><h4>Complexity</h4>O(n) to invert + O(n) to visit every node once = O(n) total, where n = number of employees.</div>
+  <div class="remember">💡 Invert once, cache it — you can't traverse "top down" until you've flipped "who's my boss" into "who reports to me."</div>
+  <div class="page-footer">Page 14/18</div>
+</div>
+
+<!-- 14 SORT CHILDREN TIEBREAK BY PARENT -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">14.</span> Sort Children by X, Tiebreak by Parent's Y</h2>
+  <p><b>Given:</b> <code>Map&lt;Manager,List&lt;Reportee&gt;&gt;</code>. <b>Task:</b> return every reportee across all managers, sorted by the reportee's age — ties broken by <i>their manager's</i> age. The trap: flattening the map naively throws away the manager link the tiebreaker needs.</p>
+  <table>
+    <tr><th>Phase</th><th>What</th><th>Stream equivalent</th></tr>
+    <tr><td>A — attach</td><td>Pair each reportee with their manager (a "sticky note")</td><td>flatMap(e -&gt; e.getValue().stream().map(r -&gt; Map.entry(r, e.getKey())))</td></tr>
+    <tr><td>B — sort</td><td>Primary: reportee age. Tiebreak: manager age</td><td>sorted(comparingInt(reportee age).thenComparingInt(manager age))</td></tr>
+    <tr><td>C — peel</td><td>Discard the sticky note, keep only the reportee</td><td>map(Map.Entry::getKey)</td></tr>
+  </table>
+  <pre>List&lt;Employee&gt; sortedDirectReporteesByAge(Map&lt;Employee, List&lt;Employee&gt;&gt; orgChart) {
+    return orgChart.entrySet().stream()
+        .flatMap(e -&gt; e.getValue().stream()
+                       .map(r -&gt; Map.entry(r, e.getKey())))          // (reportee, manager)
+        .sorted(Comparator
+            .&lt;Map.Entry&lt;Employee,Employee&gt;&gt;comparingInt(en -&gt; en.getKey().getAge())
+            .thenComparingInt(en -&gt; en.getValue().getAge()))
+        .map(Map.Entry::getKey)                                       // peel back to reportee
+        .collect(Collectors.toList());
+}</pre>
+  <div class="box trap">
+    <h4>⚠ Interview Trap</h4>
+    Most candidates call <code>orgChart.values().stream().flatMap(List::stream)</code> <i>first</i> — that discards the manager link, and the tiebreaker becomes unimplementable one line later. Say out loud, before coding: "the sort key and the tiebreak key live at different levels of the input, so flattening must preserve both."<br><br>
+    Second trap: if reportee age <i>and</i> manager age both tie, the result order looks "stable" but the input is a <code>HashMap</code> — iteration order was never deterministic to begin with. Add an explicit third tiebreaker (id/name); never rely on encounter order for correctness.
+  </div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Sort children by their own field, tiebreak by parent's field" → flatMap into <code>(child, parent)</code> pairs <i>before</i> sorting, project back to just the child <i>after</i>. General rule: whenever a sort rule needs data outside the element itself, join it in before sorting.</div>
+  <div class="box complexity"><h4>Complexity</h4>O(n log n), where n = total reportee count across all managers (dominated by the sort).</div>
+  <div class="remember">💡 Whenever a tiebreaker needs data outside the element, join it in before sorting and peel it off after — never sort what you've already flattened the context away from.</div>
+  <div class="page-footer">Page 15/18</div>
+</div>
+
+<!-- 15 JOIN TWO MAPS -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">15.</span> Join Two Maps by a Shared Key</h2>
+  <p>Java has no SQL-style join operator, but streaming one map's entries and looking each value up in a second map — by a key domain they both share — reproduces an inner/left join in a few lines. This is the natural next step after Org Tree (pg 13) and the tiebreak pattern (pg 14): all three "reshape one map using another map (or itself) as a lookup."</p>
+  <pre>Map&lt;String, String&gt; deptOfEmployee = Map.of(
+    "Alice","Engineering", "Carol","HR", "Eve","Finance");
+Map&lt;String, String&gt; headOfDept = Map.of(
+    "Engineering","Dave", "HR","Frank", "Finance","Grace");
+
+Map&lt;String, String&gt; employeeToHead = deptOfEmployee.entrySet().stream()
+    .collect(Collectors.toMap(
+        Map.Entry::getKey,                                      // employee stays the key
+        e -&gt; headOfDept.getOrDefault(e.getValue(), "Unknown")   // look up head via shared dept
+    ));</pre>
+  <table>
+    <tr><th>Employee</th><th>dept (join key)</th><th>Department Head (looked up)</th></tr>
+    <tr><td>Alice</td><td>Engineering</td><td class="ok">Dave</td></tr>
+    <tr><td>Carol</td><td>HR</td><td class="ok">Frank</td></tr>
+    <tr><td>Eve</td><td>Finance</td><td class="ok">Grace</td></tr>
+  </table>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Using plain <code>headOfDept.get(dept)</code> instead of <code>getOrDefault</code>/<code>Optional</code> means a dept missing from the second map silently poisons the result with <code>null</code>, which then NPEs several calls later, far from the actual join. Decide <b>up front</b>: should an unmatched row be dropped (<code>filter</code> before collecting) or defaulted (<code>getOrDefault</code>)? Don't let a silent null decide for you.</div>
+  <div class="box pattern"><h4>Pattern Recognition</h4>"Two maps share a key domain and I need one combined view" → stream the left map's entries, look up into the right map by the shared key. This is exactly the mental model behind the Org Tree's manager lookup and the tiebreaker's manager-age lookup — a join is the general case, those two are joins against yourself.</div>
+  <div class="box complexity"><h4>Complexity</h4>O(n) — one pass over the left map, each lookup O(1) because the right side is a <code>HashMap</code>. Using a <code>List</code> for the right side instead would make each lookup O(m), turning the whole join into O(n·m) — always pick a Map for the lookup side.</div>
+  <div class="remember">💡 A stream join is "for each entry on the left, look up the right side by the shared key" — put a Map on the right or the lookup itself becomes the bottleneck.</div>
+  <div class="page-footer">Page 16/18</div>
+</div>
+
+<!-- 16 DEFAULT/STATIC + JAVA.TIME -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">16.</span> default/static Interface Methods &amp; java.time</h2>
+  <div class="box concept">
+    <h4>default methods — why they exist</h4>
+    Before Java 8, adding a method to an interface broke every class that implemented it. <code>default</code> gives the method a body right in the interface, so old implementors keep compiling unchanged.
+    <pre>interface Greeter {
+    String name();
+    default String greet() {         // new in v2, doesn't break old code
+        return "Hello, " + name() + "!";
+    }
+}</pre>
+    This is exactly how <code>Collection.stream()</code> was retrofitted onto every existing collection class without touching their source.
+  </div>
+  <div class="box concept">
+    <h4>static interface methods</h4>
+    A factory/helper method that belongs to the interface itself, not any instance — <code>Comparator.comparing(...)</code> and <code>Function.identity()</code> are both static interface methods.
+    <pre>interface MathOps {
+    static int square(int x) { return x * x; }
+}
+MathOps.square(5);   // 25, called on the interface directly</pre>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap — the diamond problem</h4>If a class implements two interfaces that both define the <b>same default method signature</b>, it fails to compile until the class explicitly overrides that method and picks (or combines) an implementation with <code>InterfaceName.super.method()</code>. Java refuses to guess for you.</div>
+  <div class="box concept">
+    <h4>java.time — the immutable date/time API</h4>
+    <table>
+      <tr><th>Type</th><th>Represents</th><th>Example</th></tr>
+      <tr><td>LocalDate</td><td>Date, no time/zone</td><td>LocalDate.of(2026, 8, 2)</td></tr>
+      <tr><td>LocalDateTime</td><td>Date + time, no zone</td><td>LocalDateTime.now()</td></tr>
+      <tr><td>Duration</td><td>Time-based amount (hours, secs)</td><td>Duration.between(t1, t2)</td></tr>
+      <tr><td>Period</td><td>Date-based amount (years, months, days)</td><td>Period.between(d1, d2)</td></tr>
+      <tr><td>DateTimeFormatter</td><td>Parsing/formatting</td><td>DateTimeFormatter.ofPattern("yyyy-MM-dd")</td></tr>
+    </table>
+  </div>
+  <div class="box trap"><h4>⚠ Interview Trap</h4>Every <code>java.time</code> type is <b>immutable</b> — <code>date.plusDays(5)</code> returns a <i>new</i> instance and leaves <code>date</code> unchanged. Forgetting to reassign the result (<code>date = date.plusDays(5)</code>) is the exact same bug people used to hit with <code>String</code>, now resurfacing with dates instead of the old mutable, not-thread-safe <code>java.util.Date</code>/<code>Calendar</code>.</div>
+  <div class="remember">💡 default methods evolve interfaces without breaking old code; java.time fixes the old API by making every value immutable.</div>
+  <div class="page-footer">Page 17/18</div>
+</div>
+
+<!-- 17 TRAPS + PARALLEL + RECAP -->
+<div class="page">
+  <div class="page-header"><div class="section-label">DSA Interview Notes • Java 8</div></div>
+  <h2 class="topic-title"><span class="num">17.</span> Interview Traps &amp; Parallel Streams</h2>
+  <div class="box trap">
+    <h4>⚠ Checked exceptions inside a lambda</h4>
+    Functional interfaces don't declare checked exceptions, so this <b>does not compile</b>:
+    <pre>files.forEach(f -&gt; Files.readAllLines(f));  // ✗ IOException is checked</pre>
+    Fix: catch and wrap locally, or write a small custom functional interface that declares <code>throws Exception</code> and wraps it yourself.
+    <pre>files.forEach(f -&gt; {
+    try { Files.readAllLines(f); }
+    catch (IOException e) { throw new UncheckedIOException(e); }
+});</pre>
+  </div>
+  <div class="cols">
+    <div class="box trap"><h4>⚠ Stream reuse</h4>Calling a 2nd terminal op on an already-consumed stream throws <code>IllegalStateException</code>. Rebuild from the source collection each time you need to traverse again.</div>
+    <div class="box trap"><h4>⚠ Autoboxing in numeric pipelines</h4><code>Stream&lt;Integer&gt;</code> boxes every element. Prefer <code>IntStream</code>/<code>mapToInt(...)</code> for numeric work — avoids box/unbox overhead and unlocks <code>.sum()</code>/<code>.average()</code>/<code>.max()</code> directly.</div>
+  </div>
+  <div class="box trap">
+    <h4>⚠ Mutable state captured in a lambda</h4>
+    Lambdas can only capture <i>effectively final</i> locals, so people reach for a 1-element array or <code>AtomicInteger</code> as a workaround to "mutate" state inside <code>forEach</code>:
+    <pre>// anti-pattern — fighting the model instead of using it
+int[] total = {0};
+employees.forEach(e -&gt; total[0] += e.salary());   // ✗ works, but not idiomatic
+
+// idiomatic — let reduce/collect own the accumulation
+double total2 = employees.stream().mapToDouble(Employee::salary).sum();  // ✓</pre>
+  </div>
+  <div class="box trap">
+    <h4>⚠ .parallelStream() pitfalls</h4>
+    <ul>
+      <li>Shared mutable state (e.g. adding to a plain <code>ArrayList</code> from <code>forEach</code>) races across threads and silently corrupts data — use <code>collect()</code>, which handles thread-safety internally, never manual accumulation.</li>
+      <li>Element order is not guaranteed to be preserved unless the downstream collector/terminal op explicitly requires it.</li>
+      <li>For small N or I/O-bound work, thread coordination overhead usually costs more than it saves — parallel streams pay off for large, CPU-bound, stateless, associative operations only.</li>
+    </ul>
+  </div>
+  <div class="box pattern">
+    <h4>Toolbox recap</h4>
+    Lambdas (unnamed method) · Functional Interfaces (Predicate/Function/Supplier/Consumer/BiFunction) · Method References (4 kinds) · Streams (lazy pipeline) · filter/map/flatMap · sorted+distinct+limit/skip (Nth-highest) · Collectors (groupingBy/partitioningBy/joining/toMap/teeing) · reduce (general fold) · Optional (explicit absence) · Comparator chains · Reverse/Invert a Map (toMap vs groupingBy) · Org Tree from Map (invert+DFS) · Sort-Children-Tiebreak-by-Parent (flatMap join) · Join Two Maps by Shared Key · default/static interface methods · java.time (immutable dates)
+  </div>
+  <div class="remember">💡 Streams are a declarative pipeline — the moment you reach for external mutable state inside one, you're fighting the model instead of using it.</div>
+  <div class="page-footer">Page 18/18</div>
+</div>
+
+</body>
+</html>
