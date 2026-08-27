@@ -7,6 +7,8 @@ obvious.
 
 **Last verified:** 2026-08-27, against the running system.
 
+https://www.antern.co/blogs/production-grade-ai-pr-review-agent
+
 ---
 
 ## 1. What this is
