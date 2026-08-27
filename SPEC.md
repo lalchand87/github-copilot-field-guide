@@ -7,8 +7,6 @@ obvious.
 
 **Last verified:** 2026-08-27, against the running system.
 
-https://www.antern.co/blogs/production-grade-ai-pr-review-agent
-
 ---
 
 ## 1. What this is
@@ -645,3 +643,357 @@ that are actually made and the remark that reads as senior.
 
 Code is Java throughout. Diagrams are plain ASCII inside `text` fenced blocks.
 Prose uses British spelling.
+
+---
+
+# Part II — Functional Requirements
+
+Everything above describes *structure*. This part describes *behaviour*: what the
+system must do, stated so each item can be tested. `MUST` is mandatory; `SHOULD`
+is a strong default that may be traded away with a reason.
+
+---
+
+## 17. Screen layout
+
+Three columns plus a fixed top bar.
+
+```text
++--------------------------------------------------------------------+
+|  top bar:  progress ......  Part II / 12. Binary Search      12/36  |
++------------+--------------------------------------+----------------+
+|            |                                      |                |
+|  TOPICS    |            READING COLUMN            |   CONTENTS     |
+|  rail      |            (.shell > main > .col)    |   of this page |
+|            |                                      |                |
+|  grouped   |   max-width --maxread                |   sections,    |
+|  folders   |   centred                            |   scroll-spy   |
+|            |                                      |                |
++------------+--------------------------------------+----------------+
+                                          [ control panel, bottom-right ]
+```
+
+| Requirement | |
+|---|---|
+| **R17.1** | The layout MUST be a CSS grid of `--rail` / `1fr` / `--toc`. |
+| **R17.2** | The reading column MUST be capped at `--maxread` and centred, regardless of window width. |
+| **R17.3** | Either side column MUST be collapsible independently, and the reading column MUST expand to fill the freed space. |
+| **R17.4** | At viewport widths below 1100 px both side columns SHOULD hide automatically. |
+| **R17.5** | The rail width MUST widen to 270 px only at ≥ 1440 px, where there is slack. |
+
+### Top bar
+
+| Requirement | |
+|---|---|
+| **R17.6** | MUST show a progress bar reflecting position through the document. |
+| **R17.7** | MUST show the current Part and Section title, updating on scroll. |
+| **R17.8** | MUST show position as `n / total` sections. |
+| **R17.9** | MUST be hidden in zen mode. |
+
+### Topics rail
+
+| Requirement | |
+|---|---|
+| **R17.10** | MUST be built at load time from `window.STUDY_TOPICS`; the page MUST NOT hard-code it. |
+| **R17.11** | MUST group topics by `group`, in first-occurrence order. |
+| **R17.12** | Each group MUST be collapsible, and the collapsed set MUST persist across sessions and across pages. |
+| **R17.13** | The current topic MUST be visually marked. |
+| **R17.14** | A topic with `soon: true` MUST render greyed and MUST NOT be clickable. |
+| **R17.15** | MUST end with a link to the library organiser. |
+
+### Contents
+
+| Requirement | |
+|---|---|
+| **R17.16** | MUST be generated from the page's own `section.sec` elements — never hand-authored. |
+| **R17.17** | MUST highlight the section currently in view (scroll-spy). |
+| **R17.18** | Clicking an entry MUST scroll to that section. |
+
+---
+
+## 18. Reading modes
+
+Four independent toggles that compose freely.
+
+| Mode | Key | What it does |
+|---|---|---|
+| **Focus** | `f` | Paints a highlight band over the current line or paragraph. Arrow keys move it. |
+| **Dim** | `d` | Veils everything above and below the band, within the text column only. |
+| **Zen** | `z` | Hides top bar and both side columns; the reading column takes the full width. |
+| **Line / Paragraph** | `p` | The band covers *n* visual lines, or *n* whole blocks. |
+
+| Requirement | |
+|---|---|
+| **R18.1** | Focus mode MUST survive reload, per the shared preference store. |
+| **R18.2** | The band MUST cover `step` units, adjustable 1–5, with a separate value per mode. |
+| **R18.3** | Clicking any text line MUST move the band there — **whether or not focus mode is currently on**. |
+| **R18.4** | A click that ends a text selection MUST be ignored, so selecting text does not move the band. |
+| **R18.5** | Moving the band past the viewport MUST scroll it into view. |
+| **R18.6** | Dim MUST veil only the text column plus a small horizontal pad, never the side columns. |
+| **R18.7** | Zen MUST restore the previous rail and contents state on exit. |
+| **R18.8** | `Esc` MUST unwind one layer at a time: stop speech, then exit zen, then exit focus. |
+
+---
+
+## 19. The highlight band
+
+| Requirement | |
+|---|---|
+| **R19.1** | A "line" MUST be a *visual* row, not a DOM element — a wrapped paragraph of four rows is four units. |
+| **R19.2** | Table rows, list items, headings, captions and `<pre>` blocks MUST each be addressable units. |
+| **R19.3** | Content inside `<figure>` MUST never be banded. |
+| **R19.4** | Empty or whitespace-only blocks MUST be skipped. |
+| **R19.5** | The band MUST realign after font-size change, theme change, window resize and web-font load. |
+| **R19.6** | Band colour MUST offer 5 presets and an adjustable opacity. |
+| **R19.7** | The band MUST NOT obscure the text beneath it — hence `mix-blend-mode`. |
+| **R19.8** | Reading order MUST be monotonic: advancing MUST never move the band up the page. |
+
+---
+
+## 20. Reading position
+
+| Requirement | |
+|---|---|
+| **R20.1** | Position MUST be stored **per topic**, so each document remembers its own place. |
+| **R20.2** | Preferences — theme, colours, sizes, voice — MUST be stored **globally**, shared by every topic. |
+| **R20.3** | Reopening a page MUST restore its position. |
+| **R20.4** | Position MUST be an index into the collected unit list, not a pixel offset, so it survives reflow at a different window size. |
+| **R20.5** | All persistence MUST be wrapped so that a failure — private browsing, disabled storage — degrades to defaults rather than throwing. |
+
+---
+
+## 21. The control panel
+
+Bottom-right, collapsible. A permanently visible **quick strip**, then four
+accordion groups of which at most one is open. The open group persists.
+
+### Quick strip — always visible
+
+`Focus` toggle · `⟨` previous · `⟩` next · `Play`
+
+### Group 1 — Reading
+
+| Control | Range / options |
+|---|---|
+| Text size | `A−` `A+` `Reset`, 80–170 % in steps of 5 |
+| Mode | Zen mode · Focus line |
+| Side columns | Topics · Contents |
+| Step by | Lines · Paragraph |
+| Lines at a time | 1–5 |
+
+### Group 2 — Appearance
+
+| Control | Range / options |
+|---|---|
+| Colour | 5 band presets |
+| Theme | Paper · Sepia · Dark |
+| Opacity | 0–100 % |
+| Text strength | 45–100 % |
+
+### Group 3 — Read aloud
+
+| Control | Range / options |
+|---|---|
+| Transport | Play/Pause · Stop · Prev · Next |
+| Voice | every voice the browser exposes |
+| Speed | 0.6× – 2.0× |
+| Skip while reading | Code blocks · Tables |
+| Stop reading at | Section end |
+
+### Group 4 — Keyboard
+
+A reference list of every shortcut in §7.
+
+| Requirement | |
+|---|---|
+| **R21.1** | At most one group MAY be open at a time; opening one MUST close the others. |
+| **R21.2** | The open group MUST persist across sessions. |
+| **R21.3** | Every control MUST have a keyboard equivalent — the panel is a convenience, never the only route. |
+| **R21.4** | In zen mode the panel MUST fade to near-invisible and return on hover. |
+| **R21.5** | Clicks inside the panel MUST NOT propagate to the document click handler, or adjusting a control would move the band. |
+
+---
+
+## 22. Read aloud
+
+Built on the Web Speech API, which is inconsistent across browsers. The
+requirements exist mostly to absorb that.
+
+### Queue
+
+| Requirement | |
+|---|---|
+| **R22.1** | The speech queue MUST be the same block list the highlighter collected — one source of truth. |
+| **R22.2** | Reading MUST continue block to block automatically, not stop after each paragraph. |
+| **R22.3** | Pressing Play MUST start from **what is on screen**, not from wherever the band was last left. |
+| **R22.4** | If the band is already visible, Play MUST resume from it; if the reader has scrolled away, Play MUST start from the first readable line near the top of the viewport. |
+
+### What gets spoken
+
+| Requirement | |
+|---|---|
+| **R22.5** | Code blocks MUST be skippable, and when skipped MUST be announced briefly rather than silently dropped. |
+| **R22.6** | Tables MUST be independently skippable. |
+| **R22.7** | Announcement text MUST be marked *synthetic*, and character offsets from a synthetic utterance MUST NOT be mapped back into the element's real text. |
+| **R22.8** | Whitespace MUST NOT be normalised before speaking; offsets must stay aligned with the DOM text. |
+| **R22.9** | An optional "stop at section end" MUST halt reading at the section boundary. |
+
+### Word tracking
+
+| Requirement | |
+|---|---|
+| **R22.10** | The currently spoken word SHOULD be highlighted more brightly than the band, using `boundary` events. |
+| **R22.11** | Where a voice emits no `boundary` events, the system MUST degrade to block-level highlighting rather than failing. |
+| **R22.12** | The band MUST follow the voice, scrolling as reading advances. |
+
+### Voice selection
+
+| Requirement | |
+|---|---|
+| **R22.13** | The chosen voice MUST persist across reloads. |
+| **R22.14** | `getVoices()` returning empty MUST NOT overwrite the stored choice — voices arrive asynchronously via `voiceschanged`. |
+| **R22.15** | If the stored voice is unavailable in the current browser, the system MUST fall back to the default **without discarding the stored preference**, so the same page works in Edge and Chrome. |
+| **R22.16** | Where speech is unsupported entirely, the controls MUST be disabled with an explanation, and the rest of the page MUST work. |
+
+### Robustness
+
+| Requirement | |
+|---|---|
+| **R22.17** | The system MUST detect an utterance that goes silent without firing `end` and resume from where the words stopped. |
+| **R22.18** | `speak()` MUST NOT be called synchronously inside an `end` handler. |
+| **R22.19** | Speech MUST be cancelled on page unload. |
+| **R22.20** | Changing voice or speed MUST take effect on the next utterance; both are fixed for the life of one utterance. |
+
+---
+
+## 23. Non-functional requirements
+
+| Requirement | |
+|---|---|
+| **R23.1 Performance** | A band move MUST complete in under ~12 ms on a 400 KB page. Achieved by reading all geometry before writing to the highlight layer; the read-then-write ordering took one measured case from 24.2 ms to 10.7 ms. |
+| **R23.2 Page weight** | A generated page SHOULD stay under ~1 MB. Beyond that, split the source. |
+| **R23.3 Offline** | Every page MUST render fully with no network, including fonts. |
+| **R23.4 Browser support** | Any browser with `IntersectionObserver`, `Range.getClientRects` and CSS custom properties. `study.js` MUST remain ES5 — no arrow functions, `let`, template literals or modules. |
+| **R23.5 Graceful degradation** | Missing speech support, missing fonts, or disabled storage MUST each degrade to a working page. |
+| **R23.6 No build step to read** | Opening a `.html` file directly MUST work. Node is required only to *generate* pages. |
+| **R23.7 Accessibility** | Text MUST remain selectable and copyable with focus mode on; the highlight is decorative and MUST NOT intercept pointer events. |
+
+---
+
+## 24. Error and empty states
+
+| Situation | Required behaviour |
+|---|---|
+| `topics.js` missing or malformed | Page still reads; the rail is empty or absent. Never a blank page. |
+| A topic's `file` does not exist | The rail entry still renders; the browser reports the 404 on click. |
+| `data-topic` missing | Fall back to a default key, so position still saves — just not per topic. |
+| No `section.sec` elements | Contents column hides; progress reports a single unit. |
+| Speech unsupported | Voice controls disabled with a short explanatory hint. |
+| Stored voice unavailable | Silent fallback to the browser default; the stored name is kept. |
+| `localStorage` unavailable | All defaults; no crash. |
+| Empty page body | Focus mode is a no-op rather than an exception. |
+
+---
+
+## 25. Pipeline requirements
+
+| Requirement | |
+|---|---|
+| **R25.1** | One converter core MUST serve every input format. Markdown, DOCX and EPUB MUST all reduce to the same block array and share everything downstream, so a fix in one benefits all. |
+| **R25.2** | Conversion MUST be deterministic — the same input and config MUST produce a byte-identical page. |
+| **R25.3** | Section ids MUST be unique within a page, de-duplicated by suffix when titles collide. |
+| **R25.4** | Generated HTML MUST be valid: correct list nesting, balanced tags, no stray Markdown. |
+| **R25.5** | A heading MUST only open a new section if it outranks the currently open one, so nested headings do not get promoted. |
+| **R25.6** | Configs MUST be plain JSON, hand-editable, with no code in them. |
+| **R25.7** | The converter MUST report a one-line summary — parts, sections, tables, code blocks, size — so a bad build is obvious immediately. |
+
+## 26. Importer requirements
+
+| Requirement | |
+|---|---|
+| **R26.1** | Dropping a `.docx` or `.epub` MUST produce a finished topic page and register it, with no hand-editing. |
+| **R26.2** | Structure MUST be inferred from the document, not guessed from filenames. |
+| **R26.3** | EPUBs without real heading tags MUST still produce sensible chapters — Calibre conversions use styled paragraphs, and treating each spine file as a Part yields empty "Copyright" and "Dedication" parts. |
+| **R26.4** | The page title MUST come from document metadata or the uploaded filename — never from the server's temp filename. |
+| **R26.5** | Images MUST extract to `assets/<topic>/` and be referenced relatively. |
+| **R26.6** | Writing `topics.js` MUST preserve its formatting and comments, and MUST leave a `.bak`. |
+| **R26.7** | The topic list MUST be reorderable by drag and drop, and MUST remain hand-editable afterwards. |
+| **R26.8** | Slug collisions MUST get a numeric suffix rather than overwriting an existing page. |
+| **R26.9** | PDF is **out of scope** — it carries no reliable structure, so it would be the only format needing guesswork. |
+
+---
+
+## 27. Acceptance tests
+
+The system is complete when a fresh build passes all of these by hand.
+
+### Reader
+
+| # | Test | Pass |
+|---|---|---|
+| 1 | Open a page by double-clicking the file | renders fully, fonts included, no console errors |
+| 2 | Press `f` | a band appears on the first line |
+| 3 | Press `↓` twenty times | band advances monotonically, scrolling as needed |
+| 4 | Click a line halfway down | band jumps there |
+| 5 | Select a sentence with the mouse | band does **not** move |
+| 6 | Press `t` three times | paper → sepia → dark → paper |
+| 7 | Press `{` and `}` | text resizes, band stays aligned |
+| 8 | Press `-` five times | text softens, no layout shift |
+| 9 | Press `z` | side columns and top bar vanish; column is full width |
+| 10 | Reload | theme, sizes and position are restored |
+| 11 | Open a different topic, then return | each remembers its own position |
+| 12 | Resize the window narrow, then wide | band remains correctly aligned |
+| 13 | Collapse a rail group, open another page | it is still collapsed |
+
+### Read aloud
+
+| # | Test | Pass |
+|---|---|---|
+| 14 | Scroll to mid-document, press `s` | reading starts from what is on screen, not the top |
+| 15 | Let it run past a paragraph end | continues into the next block automatically |
+| 16 | Let it reach a code block with skip on | announces briefly, does not read the code |
+| 17 | Pick a voice, reload | the same voice is still selected |
+| 18 | Open the same page in another browser | falls back cleanly if that voice is absent |
+| 19 | Press `↓` while reading | skips a block rather than nudging the band |
+| 20 | Press `Esc` | speech stops immediately |
+
+### Pipeline
+
+| # | Test | Pass |
+|---|---|---|
+| 21 | Build a page from Markdown | summary line reports the expected counts |
+| 22 | Rebuild the same source | byte-identical output |
+| 23 | Run the structural audit (§14.1) | zero findings |
+| 24 | Run the highlighter audit (§14.2) | zero misaligned, zero backward |
+
+### Importer
+
+| # | Test | Pass |
+|---|---|---|
+| 25 | Drop a `.docx` | page created, topic registered, appears in the rail |
+| 26 | Drop a semantic `.epub` | real chapter titles, no empty parts |
+| 27 | Drop a Calibre-converted `.epub` | still real titles, no `part0002` |
+| 28 | Reorder topics in the library | `topics.js` rewritten, still readable and commented |
+
+---
+
+## 28. Build order
+
+If starting from nothing, this order keeps the system testable at every stage.
+
+| Stage | Deliverable | Verified by |
+|---|---|---|
+| 1 | `study.css` — layout, three themes, tokens | a hand-written `template.html` renders correctly |
+| 2 | `topics.js` + rail construction | rail lists topics, groups collapse |
+| 3 | Contents generation + scroll-spy | contents tracks scroll |
+| 4 | `collect()` and `rowsOf()` | logs the right number of line units |
+| 5 | `paint()` + focus mode | band appears and moves — **the hard part** |
+| 6 | Control panel | every control works and persists |
+| 7 | `md2study.js` — Markdown front-end | a generated page matches a hand-written one |
+| 8 | `fonts.js` | pages render offline with the right faces |
+| 9 | Read aloud | tests 14–20 pass |
+| 10 | Importer | tests 25–28 pass |
+
+**Stage 5 is where the difficulty is concentrated.** Everything before it is
+ordinary DOM work; everything after it is additive. Budget accordingly, and get
+the geometry right before building anything on top of it.
