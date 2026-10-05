@@ -1,5 +1,7 @@
 # Database Gym — Let the workload decide
 
+[← System Design index](README.md)
+
 > 50 workloads. Note the access patterns, pick the primary store from four options, then open the reasoning and the staff-level view.
 
 ## Contents

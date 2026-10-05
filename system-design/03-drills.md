@@ -1,5 +1,7 @@
 # Drill Gym — Small reps, serious progress
 
+[← System Design index](README.md)
+
 > 150 timed scenarios with constraints. Write your answer first, take the hints one at a time, then open the reference reasoning, trade-offs, staff-level view and follow-ups.
 
 ## Contents

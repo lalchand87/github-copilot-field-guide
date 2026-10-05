@@ -1,5 +1,7 @@
 # Trade-off Gym — Every decision has a cost
 
+[← System Design index](README.md)
+
 > 54 paired choices. Make your call first, then compare both options on latency, throughput, consistency, complexity, cost and failure behaviour.
 
 ## Contents

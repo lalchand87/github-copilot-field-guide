@@ -1,5 +1,7 @@
 # Capacity Gym — Get a feel for scale
 
+[← System Design index](README.md)
+
 > 50 sizing scenarios. Estimate nine numbers yourself, then open the reference answers (with the working) to check.
 
 ## How to estimate

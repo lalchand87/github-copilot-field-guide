@@ -1,5 +1,7 @@
 # Failure Gym — Break my system
 
+[← System Design index](README.md)
+
 > 50 incidents. For each: the architecture, then impact, detection, mitigation, prevention and staff-level recovery.
 
 ## Contents
